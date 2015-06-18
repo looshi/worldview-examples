@@ -9,8 +9,6 @@ log = (messages...) ->
   if !showOutputInConsole
     console.log(messages...)
 
-log(1,2,3,4,5)
-
 
 br = (heading)->
   log('  ')
