@@ -18,3 +18,6 @@ Template.ChatInput.events
     name = $('#usernameInput').val()
     console.log('set name to ' , name )
     Session.set('username',name)
+  
+  'submit #usernameForm' : (e) ->
+    e.preventDefault()
