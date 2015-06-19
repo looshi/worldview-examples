@@ -1,1 +1,1 @@
-Meteor.subscribe('messageData')
+Meteor.subscribe('recentMessages')
