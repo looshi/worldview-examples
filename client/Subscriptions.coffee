@@ -1,1 +1,1 @@
-Meteor.subscribe 'Users'
+Meteor.subscribe('messageData')
