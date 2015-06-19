@@ -8,5 +8,5 @@ Template.ChatInput.events
       if err
         console.warn 'error : message not saved'
       else
-        console.log(res,'message was saved')
+        # it's okay
     $('#chatInput').val('')
