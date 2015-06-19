@@ -18,9 +18,9 @@ Meteor.startup ->
 
 Meteor.methods
 
-  addMessage : (_message) ->
+  addMessage : (_username,_message) ->
     future = new Future();
-    message = new Message(_message,this.connection.clientAddress)
+    message = new Message(_username,_message,this.connection.clientAddress)
 
     Messages.insert message , (err,res) ->
       if err

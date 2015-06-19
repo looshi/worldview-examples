@@ -2,9 +2,11 @@
 
 
 class @Message
-  constructor: (text,ip) ->
+  constructor: (user,text,ip) ->
+    check(user,String)
     check(text,String)
     check(ip,String)
+    @user = user
     @text = text
     @ip = ip
     @created = new Date()
