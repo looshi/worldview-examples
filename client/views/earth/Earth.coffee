@@ -8,14 +8,14 @@ Template.Earth.onRendered ->
 
   scene = new THREE.Scene()
   camera  = new THREE.PerspectiveCamera(45, container.width() / container.height(), 0.01, 100 )
-  camera.position.z = 3
+  camera.position.z = 4
 
   earthContainer = new THREE.Object3D()
   scene.add( earthContainer )
 
-  geometry = new THREE.SphereGeometry(1, 32, 32)  #by making the radius 1 i think it makes the math easier for lat/lon
+  geometry = new THREE.SphereGeometry(1, 32, 32) 
   material = new THREE.MeshPhongMaterial( { color: 0xcccccc } )
-  material.map = THREE.ImageUtils.loadTexture('/earthmap1k.jpg')
+  material.map = THREE.ImageUtils.loadTexture('/earthmap1k.jpg') #high res http://www.shadedrelief.com/natural3/pages/textures.html
   earth = new THREE.Mesh( geometry, material ); 
   
   earthContainer.add( earth )
@@ -39,7 +39,6 @@ Template.Earth.onRendered ->
     x = -(radius+height) * Math.cos(phi) * Math.cos(theta)
     y = (radius+height) * Math.sin(phi)
     z = (radius+height) * Math.cos(phi) * Math.sin(theta)
-
     return new THREE.Vector3(x,y,z);
 
 
@@ -56,15 +55,51 @@ Template.Earth.onRendered ->
     mat = new THREE.MeshPhongMaterial( { color: color } )
     mesh = new THREE.Mesh( spot, mat )
     point = latLongToVector3(lat,long,1,0) 
+    console.log("Spot",color,point)
     mesh.position.set(point.x,point.y,point.z)
     earthContainer.add( mesh )
 
   addSpot(0,0,0xff0000)
   addSpot(-35.3,149.1,0x00ff00)    # australia
-  addSpot(37.8,-122.42,0x0000ff)   # san francisco
+  addSpot(37.78,-122.4,0x0000ff)   # san francisco
+
+  a = latLongToVector3(-35.3,149.1,1,0) 
+  b = latLongToVector3(37.78,-122.4,1,0)
+  c = latLongToVector3(0,0,1,0)
+
+  #  create splines between points on the sphere
+  #  i tried THREE.QuadraticBezierCurve, but couldn't get it to work
+
+  drawArc = (a,b) ->
+
+    # calculate the center point - https://brunodigiuseppe.wordpress.com/2015/02/14/flight-paths-with-threejs/
+    xC = ( 0.5 * (a.x + b.x) );
+    yC = ( 0.5 * (a.y + b.y) );
+    zC = ( 0.5 * (a.z + b.z) );
+
+    midpoint = new THREE.Vector3(xC, yC, zC)
 
 
+    spline = new THREE.SplineCurve3([
+       new THREE.Vector3(a.x,a.y,a.z)
+       new THREE.Vector3(xC*2, yC*2, zC*2)  # add a bit to the z so it sticks out
+       new THREE.Vector3(b.x,b.y,b.z)
+    ])
 
+    numPoints = 100;
+    material = new THREE.LineBasicMaterial({color: 0xffffff})
+
+    splinePoints = spline.getPoints(numPoints)
+    geometry = new THREE.Geometry();
+    
+    for point in splinePoints
+      geometry.vertices.push(point)
+
+    line = new THREE.Line(geometry, material)
+    earthContainer.add(line)
+
+  drawArc(a,b)
+  drawArc(b,c)
 
   renderer.render( scene, camera )
 
