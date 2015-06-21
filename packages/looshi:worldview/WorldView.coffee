@@ -53,7 +53,8 @@ class WorldView.World
     @renderer.setSize( domNode.width(), domNode.height() )
     @camera = new THREE.PerspectiveCamera(45, domNode.width() / domNode.height(), 0.01, 100 )
     @camera.position.z = 8
-    @controls = new THREE.OrbitControls( @camera )
+    @controls = new THREE.OrbitControls(@camera) # TODO fix restrict to dom node as second param ,domNode[0]
+    console.log("Controls",@controls)
     @controls.damping = 0.2
     @controls.addEventListener( 'change', @animate )
     @earthParent = new THREE.Object3D()
