@@ -19,6 +19,15 @@ br = (heading)->
   log(' ')
 
 
+# ---------------------- #
+# return shortcuts
+
+  # thing = Object.field.thing
+
+  # is equivalent to this  : 
+
+  # {thing} = Object.field
+
 
 # ---------------------- #
 #         Arrays         #
