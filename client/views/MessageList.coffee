@@ -13,3 +13,6 @@ Template.MessageList.helpers
 
 Template.MessageList.destroyed = () ->
   observer.stop()
+
+
+# Edit C
