@@ -1,6 +1,6 @@
 ###
 WorldView.Arc
-  arc between to two lat/long points on Earth
+  Arc between two Pin objects on the surface of Earth
   extends THREE.Line
 ### 
 class WorldView.Arc extends THREE.Line
