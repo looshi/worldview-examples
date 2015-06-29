@@ -47,7 +47,6 @@ class WorldView.World
     @camera = new THREE.PerspectiveCamera(45, domNode.width() / domNode.height(), 0.01, 100 )
     @camera.position.z = 8
     @controls = new THREE.OrbitControls(@camera) # TODO fix restrict to dom node as second param ,domNode[0]
-    console.log("Controls",@controls)
     @controls.damping = 0.2
     @controls.addEventListener( 'change', @animate )
     @earthParent = new THREE.Object3D()
@@ -69,37 +68,10 @@ class WorldView.World
 
 
   drawArc : (pinA,pinB,color) ->
-
-    a = WorldView.latLongToVector3(pinA.lat,pinA.long,2.025,0)
-    b = WorldView.latLongToVector3(pinB.lat,pinB.long,2.025,0)
-
-    console.log('draw arc',pinA.position.x,pinA.position.y)
-
-    m1 = WorldView.getPointInBetween(a,b,.4)
-    m2 = WorldView.getPointInBetween(a,b,.6)
-    # extend offset higher if the points are further away
-    offset =  ( WorldView.getDistance(a,b)  + 1 ) * .9
-
-    m1 = new THREE.Vector3(offset*m1.x,offset*m1.y,offset*m1.z)
-    m2 = new THREE.Vector3(offset*m2.x,offset*m2.y,offset*m2.z)
-
-    curve = new THREE.CubicBezierCurve3(a, m1, m2, b );
- 
-    geometry = new THREE.Geometry();
-    geometry.vertices = curve.getPoints( 50 );
-
-    # this will use pinA color by default
-    arcColor = 0xffffff
-    if color?
-      arcColor = color
-    else if pinA.color?
-      arcColor = pinA.color
-
-    material = new THREE.LineBasicMaterial( { color : arcColor } );
-
-    curveObject = new THREE.Line( geometry, material );
-
-    @earthParent.add(curveObject);
+    # arc color will be pinA color by default
+    color ?= pinA.color  
+    arc = new WorldView.Arc(pinA,pinB,color)
+    @earthParent.add(arc)
     @animate()
 
 # ----------  WorldView Helper Functions ------------- #

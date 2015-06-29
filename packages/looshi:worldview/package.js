@@ -11,6 +11,7 @@ Package.onUse(function(api){
   api.add_files('WorldView.js','client');
   api.add_files('models/Earth.coffee');
   api.add_files('models/Pin.coffee');
+  api.add_files('models/Arc.coffee');
   api.add_files('WorldView.coffee','client');
   
   

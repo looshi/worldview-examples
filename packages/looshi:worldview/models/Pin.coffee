@@ -7,7 +7,7 @@ class WorldView.Pin extends THREE.Mesh
 
   constructor: (lat,long,color) ->
     
-    color ?= 0xff000  # default to red if no color specified
+    color ?= 0xff0000  # default to red if no color specified
 
     @color = color
     @lat = lat

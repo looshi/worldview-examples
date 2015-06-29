@@ -53,7 +53,7 @@ Template.Earth.onRendered ->
 
   world.drawArc(a,k)
   world.drawArc(la,ny)
-  world.drawArc(c,la)
+  
   world.drawArc(ny,c)
 
 
