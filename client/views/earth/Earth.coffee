@@ -30,17 +30,23 @@ Template.Earth.onRendered ->
   m = world.addPin(-34.8836, -56.1819, 0x00045f)  #montevideo
   la = world.addPin(34.05,-118.25, 0xccc000)  # l.a
   ny = world.addPin(40.712,-74.006, 0x000ccc)  # ny
+  perm = world.addPin(50,56);
+  boulder = world.addPin(40,-105)
+
+  world.drawArc(c,perm)
+  world.drawArc(c,boulder)
+  world.drawArc(la,c)
 
   world.drawArc(a,b)
   world.drawArc(b,c)
   world.drawArc(c,d)
   world.drawArc(d,e)
 
-  # world.drawArc(c,e)
-  # world.drawArc(c,b)
-  # world.drawArc(c,a)
+  world.drawArc(c,e)
+  world.drawArc(c,b)
+  world.drawArc(c,a)
 
-  # world.drawArc(c,j)
+  world.drawArc(c,j)
   world.drawArc(d,k)
   world.drawArc(j,k)
   world.drawArc(b,m)

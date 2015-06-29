@@ -6,3 +6,4 @@ Display arcs between each point.
 
 inspired by : 
 https://brunodigiuseppe.wordpress.com/2015/02/14/flight-paths-with-threejs/
+http://idoco.github.io/map-chat/
