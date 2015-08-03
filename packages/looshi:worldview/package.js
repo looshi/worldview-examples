@@ -7,17 +7,21 @@ Package.onUse(function(api){
   api.use('templating','client');
   api.use('coffeescript','client');
   api.use('davidcittadini:three@0.71.12')
+
+  api.add_files('assets/droid_sans_regular.typeface.js','client');
+
+
   api.export('WorldView');
   api.add_files('WorldView.js','client');
   api.add_files('models/Earth.coffee');
   api.add_files('models/Pin.coffee');
   api.add_files('models/Arc.coffee');
+  api.add_files('models/Text.coffee');
   api.add_files('WorldView.coffee','client');
-  
-  
+
 
   api.add_files('assets/earthmap1k.jpg','client');   // use isasset
   api.add_files('assets/earthmap2k.jpg','client');
   api.add_files('assets/earthmap4k.jpg','client');
-  
+
 })

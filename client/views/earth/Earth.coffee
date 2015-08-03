@@ -1,23 +1,24 @@
 
-### 
+###
 Earth
 renders a 3D earth into a div using THREE.js
 displays spots on the earth for each connected client
-displays arcs for each chat message sent from user to user 
-  i.e. the message "@user message text contents" will display an arc between current user and @user
+displays arcs for each chat message sent from user to user
+  i.e. the message "@user message text contents"
+  will display an arc between current user and @user
 
-resources : 
-  flight path arcs : 
+resources :
+  flight path arcs :
   https://brunodigiuseppe.wordpress.com/2015/02/14/flight-paths-with-threejs/
   point on line :
   http://jsfiddle.net/0mgqa7te/
-  latLongToVector3 : 
+  latLongToVector3 :
   http://www.smartjava.org/content/render-open-data-3d-world-globe-threejs
 ###
 
 Template.Earth.onRendered ->
 
-  world = new WorldView.World('dave')
+  world = new WorldView.World()
   console.log('my world',world)
   world.appendTo( $('#earthContainer') )
   a = world.addPin(0,0,0xff0000)
@@ -33,29 +34,31 @@ Template.Earth.onRendered ->
   perm = world.addPin(50,56);
   boulder = world.addPin(40,-105)
 
-  world.drawArc(c,perm)
-  world.drawArc(c,boulder)
-  world.drawArc(la,c)
+  arc1 = world.drawArc(c,perm)
+  arc2 = world.drawArc(c,boulder)
+  arc3 = world.drawArc(la,c)
+  world.moveTextAlongArc(arc1,'arc 1')
+  world.moveTextAlongArc(arc2,'arc 2')
+  world.moveTextAlongArc(arc3,'arc 3')
 
-  world.drawArc(a,b)
-  world.drawArc(b,c)
-  world.drawArc(c,d)
-  world.drawArc(d,e)
+  # world.drawArc(a,b)
+  # world.drawArc(b,c)
+  # world.drawArc(c,d)
+  # world.drawArc(d,e)
 
-  world.drawArc(c,e)
-  world.drawArc(c,b)
-  world.drawArc(c,a)
+  # world.drawArc(c,e)
+  # world.drawArc(c,b)
+  # world.drawArc(c,a)
 
-  world.drawArc(c,j)
-  world.drawArc(d,k)
-  world.drawArc(j,k)
-  world.drawArc(b,m)
+  # world.drawArc(c,j)
+  # world.drawArc(d,k)
+  # world.drawArc(j,k)
+  # world.drawArc(b,m)
 
-  world.drawArc(a,k)
-  world.drawArc(la,ny)
-  
-  world.drawArc(ny,c)
+  # world.drawArc(a,k)
+  # world.drawArc(la,ny)
+
+  # world.drawArc(ny,c)
 
 
 
-  

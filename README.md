@@ -1,6 +1,2 @@
-# worldchat
-app to learn coffeescript and three js
-conflict resolve test
-Change A
-Change B
-Change C
+WorldChat
+Meteor application which renders chat messages on a 3D model of the earth.

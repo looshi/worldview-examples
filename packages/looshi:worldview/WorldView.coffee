@@ -11,26 +11,27 @@ class WorldView.World
     @renderer.shadowMapEnabled = true
     @scene = new THREE.Scene()
     @pins = []
+    @texts = []
     @camera = null
     @controls = null
     @earthParent = null
     @earth = null
 
   # ---------------
-  # animation loop 
+  # animation loop
 
   Vector3zero = new THREE.Vector3()  # point (0,0,0)
 
-  animate : =>
-    console.log('animating')
-    # scale pins inversely proportional to zoom
-    scale = .25 * @camera.position.distanceTo(Vector3zero)
-    
+  renderCamera : =>
+    # scale pins and text inversely proportional to zoom
+    scalePin = .25 * @camera.position.distanceTo(Vector3zero)
+    scaleText = .002 * @camera.position.distanceTo(Vector3zero)
     for pin in @pins
-      pin.scale.set(scale,scale,scale)
-    
+      pin.scale.set(scalePin,scalePin,scalePin)
+    for text in @texts
+      text.scale.set(scaleText,scaleText,scaleText)
+      text.lookAt(@camera.position)
     @renderer.render(@scene, @camera)
-    
 
   addLighting : () ->
     ambientLight = new THREE.AmbientLight( 0x888888 )
@@ -40,39 +41,57 @@ class WorldView.World
     light.castShadow  = true
     @scene.add(light)
 
-
   appendTo : (domNode) ->
     domNode.append( @renderer.domElement )
-    @renderer.setSize( domNode.width(), domNode.height() )
-    @camera = new THREE.PerspectiveCamera(45, domNode.width() / domNode.height(), 0.01, 100 )
+    dW = domNode.width()
+    dH = domNode.height()
+    @renderer.setSize(dW, dH)
+    @camera = new THREE.PerspectiveCamera(45, dW/dH, 0.01, 100 )
     @camera.position.z = 8
-    @controls = new THREE.OrbitControls(@camera) # TODO fix restrict to dom node as second param ,domNode[0]
+    @controls = new THREE.OrbitControls(@camera, domNode[0])
     @controls.damping = 0.2
-    @controls.addEventListener( 'change', @animate )
+    @controls.addEventListener( 'change', @renderCamera )
     @earthParent = new THREE.Object3D()
     @scene.add( @earthParent )
-    @earth = new WorldView.Earth(@animate)
+    @earth = new WorldView.Earth(@renderCamera)
     @earthParent.add( @earth )
     @scene.add( @earthParent )
     @addLighting()
-    @animate()
-
+    @renderCamera()
 
   addPin : (lat,long,color) ->
     pin = new WorldView.Pin(lat, long, color)
     @earthParent.add(pin)
     @pins.push(pin)
-    point = WorldView.latLongToVector3(lat,long,2,0) 
+    point = WorldView.latLongToVector3(lat,long,2,0)
     pin.position.set(point.x,point.y,point.z)
-    return pin
+    pin
 
-
-  drawArc : (pinA,pinB,color) ->
+  drawArc : (pinA, pinB, color) ->
     # arc color will be pinA color by default
-    color ?= pinA.color  
-    arc = new WorldView.Arc(pinA,pinB,color)
+    color ?= pinA.color
+    arc = new WorldView.Arc(pinA, pinB, color)
     @earthParent.add(arc)
-    @animate()
+    @renderCamera()
+    arc
+
+  moveTextAlongArc: (arc, message) ->
+    text = new WorldView.Text(message)
+    @texts.push(text)
+    @earthParent.add(text)
+    @animateText arc, text
+
+  animateText: (arc, text) ->
+    point = arc.getPoint(text.positionOnArc)
+    text.position.set(point.x, point.y, point.z)
+    text.positionOnArc = text.positionOnArc - .5
+    if text.positionOnArc > 0
+      requestAnimationFrame () =>
+        @animateText arc, text
+      @renderCamera()
+    else
+      # @earthParent.remove(text)
+
 
 # ----------  WorldView Helper Functions ------------- #
 
@@ -93,7 +112,3 @@ WorldView.getPointInBetween = (pointA, pointB, percentage) ->
 WorldView.getDistance = (pointA,pointB) ->
   dir = pointB.clone().sub(pointA)
   return dir.length()
-
-
-
-

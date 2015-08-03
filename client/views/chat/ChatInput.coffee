@@ -2,11 +2,13 @@ Template.ChatInput.events
   'submit #chatForm': (e) ->
     e.preventDefault()
     msg = $('#chatInput').val()
-    if(msg.length<1)
-      return
-    user = Session.get('username')
+    return if msg.length<1
+
+    user = Session.get 'username'
     user or= 'anonymous'
-    Meteor.call 'addMessage', user , msg, (err,res) ->
+    ip = Session.get 'ipAddress'
+    ip or= 'unknown'
+    Meteor.call 'addMessage', user, ip, msg, (err,res) ->
       if err
         console.warn 'error : message not saved'
       else
@@ -16,8 +18,7 @@ Template.ChatInput.events
   'change #usernameInput' : (e) ->
     e.preventDefault()
     name = $('#usernameInput').val()
-    console.log('set name to ' , name )
     Session.set('username',name)
-  
+
   'submit #usernameForm' : (e) ->
     e.preventDefault()
