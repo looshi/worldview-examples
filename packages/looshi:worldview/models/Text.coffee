@@ -30,9 +30,8 @@ class WorldView.Text extends THREE.Mesh
 
     geom = new THREE.TextGeometry text, options
 
-
-    geom.computeBoundingBox();
-    geom.computeVertexNormals();
+    geom.computeBoundingBox()
+    geom.computeVertexNormals()
     xOffset = -0.5 * ( geom.boundingBox.max.x - geom.boundingBox.min.x )
     yOffset = -0.5 * ( geom.boundingBox.max.y - geom.boundingBox.min.y )
     text = new THREE.Mesh(geom, mat)
