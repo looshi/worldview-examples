@@ -1,12 +1,11 @@
 @Messages = new Mongo.Collection('Messages')
 
-
 class @Message
-  constructor: (user,text,ip) ->
-    check(user,String)
-    check(text,String)
-    check(ip,String)
+  constructor: (user, position, message) ->
+    check(user, String)
+    check(message, String)
+    check(position, Object)
     @user = user
-    @text = text
-    @ip = ip
+    @text = message
+    @position = position
     @created = new Date()

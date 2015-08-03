@@ -10,6 +10,9 @@ class WorldView.Earth
     @earthGeometry = new THREE.SphereGeometry(2, 32, 32)
     @earthMaterial = new THREE.MeshPhongMaterial()
     @imagepath = '/packages/looshi_worldview/assets/earthmap4k.jpg'
-    @earthMaterial.map = THREE.ImageUtils.loadTexture(@imagepath,THREE.UVMapping,doneLoading)
+    @earthMaterial.map = THREE.ImageUtils.loadTexture(
+      @imagepath,
+      THREE.UVMapping,
+      doneLoading )
     @earth = new THREE.Mesh( @earthGeometry, @earthMaterial )
     return @earth

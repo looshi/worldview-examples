@@ -1,31 +1,22 @@
-Fiber = Npm.require('fibers');
-Future = Npm.require('fibers/future');
+Fiber = Npm.require('fibers')
+Future = Npm.require('fibers/future')
 
 Meteor.startup ->
-  amt = 40
-  if Meteor.users.find().count() < amt
-    while amt > 0
-      amt -= 1
-      user = 
-        username:Fake.user('name').name
-        password:Fake.word()
-      try
-        Accounts.createUser(user)
-        console.log(user)
-      catch error
-        console.log(error)
-      
+  Messages.remove({})
 
 Meteor.methods
 
-  addMessage : (_username,_message) ->
-    future = new Future();
-    message = new Message(_username,_message,this.connection.clientAddress)
-
+  addMessage : (_username, _position, _message) ->
+    future = new Future()
+    message = new Message(
+      _username,
+      _position,
+      _message
+    )
     Messages.insert message , (err,res) ->
       if err
         future.throw("Message insert Error."+err)
       else
-        future.return(res);
-      
-    return future.wait();
+        future.return(res)
+
+    return future.wait()

@@ -6,19 +6,19 @@ class WorldView.Text extends THREE.Mesh
 
   constructor: (text, color) ->
     @positionOnArc = 100  # percentage distance along on an arc
-    color ?= 0xff0000
+    @positionFromEarth = 0  # distance from earth
     @color = color
-
+    color ?= 0xff0000
     shading = THREE.SmoothShading
     mat = new THREE.MeshFaceMaterial([
       new THREE.MeshPhongMaterial({ color: 0xffffff, shading: shading }),
-      new THREE.MeshPhongMaterial({ color: 0x000000, shading: shading })
+      new THREE.MeshPhongMaterial({ color: color, shading: shading })
     ])
 
     options =
       size: 8
       height: 8
-      curveSegments: 4
+      curveSegments: 1
       font: 'droid sans'
       weight: 'normal'
       style: 'normal'

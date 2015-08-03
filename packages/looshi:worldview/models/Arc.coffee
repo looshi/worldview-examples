@@ -26,7 +26,7 @@ class WorldView.Arc extends THREE.Line
     geometry.vertices = @curve.getPoints( 100 )
     material = new THREE.LineBasicMaterial(color: color,linewidth: 2, fog:true)
 
-    super( geometry, material );
+    super( geometry, material )
 
   getPoint: (percentDistance) ->
     @curve.getPoint(percentDistance / 100)
