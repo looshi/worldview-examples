@@ -1,7 +1,0 @@
-template(name="MessageList")
-
-  div(class='message-list-container')
-    ul(class='message-list')
-      each messages
-        li(class='message-list-item') #[span(class='user') {{user}} {{formatDateAgo created}}] #[br] {{text}}
- 
