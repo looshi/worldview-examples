@@ -17,6 +17,7 @@ Package.onUse(function(api){
   api.add_files('models/Pin.coffee');
   api.add_files('models/Arc.coffee');
   api.add_files('models/Text.coffee');
+  api.add_files('models/Flag.coffee');
   api.add_files('WorldView.coffee','client');
 
 

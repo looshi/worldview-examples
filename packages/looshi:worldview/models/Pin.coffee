@@ -1,5 +1,5 @@
 ###
-WorldView.pin
+WorldView.Pin
   3D model which represents a lat/long point
   extends THREE.mesh with a few useful properties
 ###
@@ -13,6 +13,8 @@ class WorldView.Pin extends THREE.Mesh
     @lat = lat
     @long = long
 
-    geom = new THREE.SphereGeometry(.05, 16, 16)
+    geom = new THREE.SphereGeometry(1, 16, 16)
     mat = new THREE.MeshPhongMaterial( { color: color } )
     super( geom, mat )
+    scale = .01
+    @scale.set(scale,scale,scale)

@@ -1,10 +1,10 @@
 ###
 WorldView.Text
-  text that appears on a 3D plane
+  extruded 3d text
 ###
 class WorldView.Text extends THREE.Mesh
 
-  constructor: (text, color) ->
+  constructor: (text, color, bevel, thickness) ->
     @positionOnArc = 100  # percentage distance along on an arc
     @positionFromEarth = 0  # distance from earth
     @color = color
@@ -16,15 +16,15 @@ class WorldView.Text extends THREE.Mesh
     ])
 
     options =
-      size: 8
-      height: 8
+      size: 1
+      height: 1
       curveSegments: 1
       font: 'droid sans'
       weight: 'normal'
       style: 'normal'
-      bevelThickness: .01
+      bevelThickness: thickness ?= .01
       bevelSize: .01
-      bevelEnabled: true
+      bevelEnabled: bevel ?= true
       material: 0
       extrudeMaterial: 1
 
@@ -38,5 +38,3 @@ class WorldView.Text extends THREE.Mesh
     text.position.set(xOffset, yOffset, 0)
     super()
     @add text
-    scale = .008
-    @scale.set(scale,scale,scale)

@@ -17,27 +17,28 @@ resources :
 ###
 
 pin = undefined
+flag = undefined
 color = Helpers.randomColor()
 
 Template.Earth.onRendered ->
 
   world = new WorldView.World()
-  console.log('my world',world)
   world.appendTo( $('#earthContainer') )
 
-    # get user's lat/long position
+  # get user's lat/long position
   navigator.geolocation.getCurrentPosition (position) ->
     position =
       latitude: position.coords.latitude
       longitude: position.coords.longitude
     position or= {latitude:0,longitude:0}
     Session.set('userPosition', position)
-    pin = world.addPin(position.latitude,position.longitude,color)
+    pin = world.addPin(position.latitude, position.longitude, color)
+    flag = world.addFlag(position.latitude, position.longitude, color,'dave')
 
   observer = Messages.find().observeChanges
     added: (id, message) ->
       # animate text outward if message is new
-      if message.created.getTime() > new Date().getTime() - 4000
+      if message.created.getTime() > ( new Date().getTime() - 4000 )
         lat = message.position.latitude
         long = message.position.longitude
         world.moveTextOutward(
