@@ -1,7 +1,6 @@
 ###
 WorldView.Pin
-  3D model which represents a lat/long point
-  extends THREE.mesh with a few useful properties
+  Sphere shape.
 ###
 class WorldView.Pin extends THREE.Mesh
 

@@ -10,7 +10,6 @@ Package.onUse(function(api){
 
   api.add_files('assets/droid_sans_regular.typeface.js','client');
 
-
   api.export('WorldView');
   api.add_files('WorldView.js','client');
   api.add_files('models/Earth.coffee');
@@ -19,10 +18,6 @@ Package.onUse(function(api){
   api.add_files('models/Text.coffee');
   api.add_files('models/Flag.coffee');
   api.add_files('WorldView.coffee','client');
-
-
-  api.add_files('assets/earthmap1k.jpg','client');   // use isasset
-  api.add_files('assets/earthmap2k.jpg','client');
   api.add_files('assets/earthmap4k.jpg','client');
 
 })

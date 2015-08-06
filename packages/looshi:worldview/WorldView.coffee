@@ -6,7 +6,7 @@ WorldView.World
 
 class WorldView.World
 
-  constructor: () ->
+  constructor: (@earthTexture) ->
     @renderer = new THREE.WebGLRenderer({antialias:true})
     @renderer.shadowMapEnabled = true
     @scene = new THREE.Scene()
@@ -17,6 +17,7 @@ class WorldView.World
     @controls = null
     @earthParent = null
     @earth = null
+    @earthTexture ?= undefined
 
   VECTOR_ZERO = new THREE.Vector3()  # 0,0,0 point
   ITEM_SCALE = .05                   # non-earth items scale
@@ -26,17 +27,22 @@ class WorldView.World
     cameraDistance = Math.log( @camera.position.distanceTo(VECTOR_ZERO) - 1 )
     scalePin = ITEM_SCALE * cameraDistance * .75
     for pin in @pins
-      pin.scale.set(scalePin,scalePin,scalePin)
+      pin.scale.set(scalePin, scalePin, scalePin)
+
+    # reorient flags so they are readable to camera
+    for flag in @flags
+      flag.lookAt(@camera.position)
+
     @renderer.render(@scene, @camera)
 
   renderScene : ->
     @renderer.render(@scene, @camera)
 
   addLighting : () ->
-    ambientLight = new THREE.AmbientLight( 0x888888 )
+    ambientLight = new THREE.AmbientLight(0x888888)
     @scene.add( ambientLight )
-    light = new THREE.DirectionalLight( 0xcccccc, 1 )
-    light.position.set(10,10,10)
+    light = new THREE.DirectionalLight(0xcccccc, 1)
+    light.position.set(10, 10, 10)
     light.castShadow  = true
     @scene.add(light)
 
@@ -45,22 +51,23 @@ class WorldView.World
     dW = domNode.width()
     dH = domNode.height()
     @renderer.setSize(dW, dH)
-    @camera = new THREE.PerspectiveCamera(45, dW/dH, 0.01, 100 )
+    @camera = new THREE.PerspectiveCamera(45, dW/dH, 0.01, 100)
     @camera.position.z = 8
     @controls = new THREE.OrbitControls(@camera, domNode[0])
     @controls.damping = 0.2
-    @controls.addEventListener( 'change', @renderCameraMove )
+    @controls.addEventListener('change', @renderCameraMove)
     @earthParent = new THREE.Object3D()
     @scene.add( @earthParent )
-    @earth = new WorldView.Earth(@renderCameraMove)
-    @earthParent.add( @earth )
-    @scene.add( @earthParent )
+    @earth = new WorldView.Earth(@earthTexture, @renderCameraMove)
+    @earthParent.add(@earth)
+    @scene.add(@earthParent)
     @addLighting()
     @renderCameraMove()
+    return @earthParent
 
   addPin : (lat, long, color) ->
     pin = new WorldView.Pin(lat, long, color)
-    @addToSurface(pin,lat,long)
+    @addToSurface(pin, lat, long)
     @pins.push(pin)
     @renderCameraMove()
     pin
@@ -73,14 +80,21 @@ class WorldView.World
     flag = new WorldView.Flag(lat, long, color, text)
     @addToSurface(flag, lat, long)
     @renderCameraMove()
+    @flags.push(flag)
     flag
 
   addToSurface : (obj, lat, long) ->
     @earthParent.add(obj)
-    point = WorldView.latLongToVector3(lat,long,2,0)
-    obj.position.set(point.x,point.y,point.z)
+    point = WorldView.latLongToVector3(lat, long, 2, 0)
+    obj.position.set(point.x, point.y, point.z)
     obj.scale.set(ITEM_SCALE, ITEM_SCALE, ITEM_SCALE)
     obj
+
+  add : (obj) ->
+    @earthParent.add(obj)
+
+  remove : (obj) ->
+    @earthParent.remove(obj)
 
   drawArc : (pinA, pinB, color) ->
     # arc color will be pinA color by default
@@ -91,50 +105,10 @@ class WorldView.World
     arc
 
   moveTextAlongArc: (arc, message) ->
-    text = new WorldView.Text(message)
+    text = new WorldView.Text(message, 0xffffff, true, 1, true)
     @texts.push(text)
     @earthParent.add(text)
     @animateTextOnArc arc, text
-
-  animateTextOnArc: (arc, text) ->
-    point = arc.getPoint(text.positionOnArc)
-    text.position.set(point.x, point.y, point.z)
-    text.positionOnArc = text.positionOnArc - .5
-    if text.positionOnArc > 0
-      requestAnimationFrame () =>
-        @animateTextOnArc arc, text
-      @renderScene()
-    else
-      Meteor.setTimeout (=>
-        @earthParent.remove(text)
-        @renderScene()
-      ), 1000
-
-  moveTextOutward: (lat, long, message, color) ->
-    text = new WorldView.Text(message, color)
-    point = WorldView.latLongToVector3(lat, long, 2.025, 0)
-    text.position.set(point.x,point.y,point.z)
-    text.positionFromEarth = 1
-    # @texts.push(text)
-    @earthParent.add(text)
-    direction = text.position.clone().sub(@earthParent.position).normalize()
-    WorldView.lookAwayFrom(text,@earthParent)
-    @animateTextOutward(text, direction)
-
-  # animates text from start point away from earth
-  animateTextOutward: (text, direction) ->
-    text.positionFromEarth = text.positionFromEarth + .5
-    if text.positionFromEarth < 1000
-      requestAnimationFrame () =>
-        text.position.add(direction.clone().multiplyScalar(.005))
-        scaleText = .015 * Math.log( text.positionFromEarth )
-        text.scale.set(scaleText,scaleText,scaleText)
-        @animateTextOutward(text, direction)
-      @renderScene()
-    else
-      @earthParent.remove(text)
-      @renderScene()
-
 
 # ----------  WorldView Helper Functions ------------- #
 

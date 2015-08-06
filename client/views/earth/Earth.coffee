@@ -19,11 +19,13 @@ resources :
 pin = undefined
 flag = undefined
 color = Helpers.randomColor()
+earthModel = undefined
+world = undefined
 
 Template.Earth.onRendered ->
 
   world = new WorldView.World()
-  world.appendTo( $('#earthContainer') )
+  earthModel = world.appendTo( $('#earthContainer') )
 
   # get user's lat/long position
   navigator.geolocation.getCurrentPosition (position) ->
@@ -32,7 +34,7 @@ Template.Earth.onRendered ->
       longitude: position.coords.longitude
     position or= {latitude:0,longitude:0}
     Session.set('userPosition', position)
-    pin = world.addPin(position.latitude, position.longitude, color)
+    # pin = world.addPin(position.latitude, position.longitude, color)
     flag = world.addFlag(position.latitude, position.longitude, color,'dave')
 
   observer = Messages.find().observeChanges
@@ -41,17 +43,57 @@ Template.Earth.onRendered ->
       if message.created.getTime() > ( new Date().getTime() - 4000 )
         lat = message.position.latitude
         long = message.position.longitude
-        world.moveTextOutward(
-          message.position.latitude,
-          message.position.longitude,
-          message.text,
-          color)
+        text = message.text
 
-      hasPin = world.getPin(lat, long)
-      unless hasPin
-        pin = world.addPin(lat, long, color)
+        moveTextOutward(lat, long, text, color)
+
+      # hasPin = world.getPin(lat, long)
+      # unless hasPin
+      #   pin = world.addPin(lat, long, color)
       # animate text along arc from one user to another
       # world.moveTextAlongArc(arc1,'arc 1')
+
+animateTextOnArc = (arc, text) ->
+  point = arc.getPoint(text.positionOnArc)
+  text.position.set(point.x, point.y, point.z)
+  text.positionOnArc = text.positionOnArc - .5
+  if text.positionOnArc > 0
+    requestAnimationFrame () =>
+      @animateTextOnArc arc, text
+    @renderScene()
+  else
+    Meteor.setTimeout (=>
+      @earthParent.remove(text)
+      @renderScene()
+    ), 1000
+
+moveTextOutward = (lat, long, message, color) ->
+  text = new WorldView.Text(message, color, true, 1, true)
+  text.positionFromEarth = 0
+  world.addToSurface(text, lat, long)
+  direction = text.position.clone().sub(earthModel.position).normalize()
+  VECTOR_ZERO = new THREE.Vector3()  # 0,0,0 point
+  WorldView.lookAwayFrom(text, earthModel)
+  animateTextOutward(text, direction)
+
+# animates text from start point away from earth
+animateTextOutward = (text, direction) ->
+  text.positionFromEarth = text.positionFromEarth + .5
+  console.log 'text', text.positionFromEarth
+  if text.positionFromEarth < 1000
+    requestAnimationFrame () =>
+      text.position.add(direction.clone().multiplyScalar(.005))
+      scaleText = .015 * Math.log( text.positionFromEarth )
+      text.scale.set(scaleText,scaleText,scaleText)
+      animateTextOutward(text, direction)
+    world.renderScene()
+  else
+    world.remove(text)
+    world.renderScene()
+
+
+
+# ---------------------------------------------------------------
 
   # a = world.addPin(0,0,0xff0000)
   # b = world.addPin(-35.3,149.1,0x00ff00)    # australia
