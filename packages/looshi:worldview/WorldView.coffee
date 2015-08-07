@@ -9,7 +9,9 @@ class WorldView.World
   constructor: (@earthTexture) ->
     @renderer = new THREE.WebGLRenderer({antialias:true})
     @renderer.shadowMapEnabled = true
-    @scene = new THREE.Scene()
+    @renderer.autoClear = false
+    @mainScene = new THREE.Scene()
+    @zScene = new THREE.Scene() # items in "z" scene appear above mainScene
     @pins = []
     @flags = []
     @texts = []
@@ -25,26 +27,42 @@ class WorldView.World
   renderCameraMove : =>
     # scale pins inversely proportional to zoom
     cameraDistance = Math.log( @camera.position.distanceTo(VECTOR_ZERO) - 1 )
-    scalePin = ITEM_SCALE * cameraDistance * .75
+    scalePin = ITEM_SCALE * cameraDistance
     for pin in @pins
       pin.scale.set(scalePin, scalePin, scalePin)
-
-    # reorient flags so they are readable to camera
     for flag in @flags
       flag.lookAt(@camera.position)
+      # manually hide flags when they go behind earth when
+      # the angle at Vector Zero for the triangle flag,0,camera > 90 degrees
+      a = WorldView.getDistance(@camera.position,flag.position)
+      b = WorldView.getDistance(flag.position, VECTOR_ZERO)
+      c = WorldView.getDistance(@camera.position, VECTOR_ZERO)
+      Angle = (b*b + c*c - a*a) / (2*b*c)
+      # hide around 1.2 radians ( trial and error, 90 degrees = 1.57 radians)
+      Angle = Math.acos(Angle)
+      if Angle < 1.2
+        flag.visible = true
+        flag.scale.set(scalePin, scalePin, scalePin)
+      else
+        flag.visible = false
 
-    @renderer.render(@scene, @camera)
+    @renderScene()
 
   renderScene : ->
-    @renderer.render(@scene, @camera)
+    @renderer.clear()
+    @renderer.render(@mainScene, @camera)
+    @renderer.clearDepth()
+    @renderer.render(@zScene, @camera)
 
   addLighting : () ->
-    ambientLight = new THREE.AmbientLight(0x888888)
-    @scene.add( ambientLight )
-    light = new THREE.DirectionalLight(0xcccccc, 1)
-    light.position.set(10, 10, 10)
+    ambientLight = new THREE.AmbientLight(0xcccccc)
+    @camera.add( ambientLight )
+    @zScene.add(ambientLight.clone())
+    light = new THREE.DirectionalLight(0xffffff, 1)
+    light.castShadow = true
+    light.position.set(-15, 8, -20)
     light.castShadow  = true
-    @scene.add(light)
+    @camera.add(light)
 
   appendTo : (domNode) ->
     domNode.append( @renderer.domElement )
@@ -57,10 +75,11 @@ class WorldView.World
     @controls.damping = 0.2
     @controls.addEventListener('change', @renderCameraMove)
     @earthParent = new THREE.Object3D()
-    @scene.add( @earthParent )
+    @mainScene.add(@camera)
+    @mainScene.add( @earthParent )
     @earth = new WorldView.Earth(@earthTexture, @renderCameraMove)
     @earthParent.add(@earth)
-    @scene.add(@earthParent)
+    @mainScene.add(@earthParent)
     @addLighting()
     @renderCameraMove()
     return @earthParent
@@ -84,7 +103,7 @@ class WorldView.World
     flag
 
   addToSurface : (obj, lat, long) ->
-    @earthParent.add(obj)
+    @zScene.add(obj)
     point = WorldView.latLongToVector3(lat, long, 2, 0)
     obj.position.set(point.x, point.y, point.z)
     obj.scale.set(ITEM_SCALE, ITEM_SCALE, ITEM_SCALE)
@@ -96,19 +115,27 @@ class WorldView.World
   remove : (obj) ->
     @earthParent.remove(obj)
 
-  drawArc : (pinA, pinB, color) ->
-    # arc color will be pinA color by default
-    color ?= pinA.color
-    arc = new WorldView.Arc(pinA, pinB, color)
+  drawArc : (fromLat, fromLong, toLat, toLong, color) ->
+    arc = new WorldView.Arc(fromLat, fromLong, toLat, toLong, color)
     @earthParent.add(arc)
     @renderScene()
     arc
 
-  moveTextAlongArc: (arc, message) ->
-    text = new WorldView.Text(message, 0xffffff, true, 1, true)
-    @texts.push(text)
-    @earthParent.add(text)
-    @animateTextOnArc arc, text
+  animateObjectOnArc = (arc, obj, duration) ->
+    if not obj['positionOnArc']
+      obj.positionOnArc = duration
+    point = arc.getPoint(obj.positionOnArc)
+    obj.position.set(point.x, point.y, point.z)
+    obj.positionOnArc = obj.positionOnArc - 1
+    if obj.positionOnArc > 0
+      requestAnimationFrame () =>
+        @animateObjectOnArc arc, obj
+      @renderScene()
+    else
+      Meteor.setTimeout (=>
+        @earthParent.remove(obj)
+        @renderScene()
+      ), 1000
 
 # ----------  WorldView Helper Functions ------------- #
 

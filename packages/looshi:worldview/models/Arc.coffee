@@ -1,16 +1,15 @@
 ###
 WorldView.Arc
-  Arc between two 3D objects on the surface of Earth.
-  extends THREE.Line
+  Arc between two latitude/longitude points on the surface of Earth.
 ###
 class WorldView.Arc extends THREE.Line
 
-  constructor: (objectA, objectB, color) ->
+  constructor: (fromLat, fromLong, toLat, toLong, color) ->
 
     color ?= 0xffffff  # default to white if no color specified
 
-    a = WorldView.latLongToVector3(objectA.lat, objectA.long, 2.025, 0)
-    b = WorldView.latLongToVector3(objectB.lat, objectB.long, 2.025, 0)
+    a = WorldView.latLongToVector3(fromLat, fromLong, 2, 0)
+    b = WorldView.latLongToVector3(toLat, toLong, 2, 0)
 
     m1 = WorldView.getPointInBetween(a, b, .4)
     m2 = WorldView.getPointInBetween(a, b, .6)

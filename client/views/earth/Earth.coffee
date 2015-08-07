@@ -46,26 +46,22 @@ Template.Earth.onRendered ->
         text = message.text
 
         moveTextOutward(lat, long, text, color)
-
       # hasPin = world.getPin(lat, long)
       # unless hasPin
       #   pin = world.addPin(lat, long, color)
       # animate text along arc from one user to another
       # world.moveTextAlongArc(arc1,'arc 1')
 
-animateTextOnArc = (arc, text) ->
-  point = arc.getPoint(text.positionOnArc)
-  text.position.set(point.x, point.y, point.z)
-  text.positionOnArc = text.positionOnArc - .5
-  if text.positionOnArc > 0
-    requestAnimationFrame () =>
-      @animateTextOnArc arc, text
-    @renderScene()
-  else
-    Meteor.setTimeout (=>
-      @earthParent.remove(text)
-      @renderScene()
-    ), 1000
+
+  world.addFlag(35.6833, 139.7667, 0x999999,'Japan')
+  world.addFlag(40.712,-74.006, 0x000ccc,'New York')
+  world.addFlag(50,56, 0x000ccc,'perm')
+  world.addFlag(40,-105, 0xcc0000,'Boulder')
+  world.addFlag(-35.3,149.1,0x222222,'Australia')
+  world.addFlag(-34.6033,-58.3817,0x55550c,'Buenos Aires')
+  world.addFlag(48.856,2.3508,0x55550c,'Paris')
+  world.addFlag(50.0614,19.9383,0x55550c,'Krakow')
+  world.addFlag(-33.9253,18.4239,0x55550c,'Cape Town')
 
 moveTextOutward = (lat, long, message, color) ->
   text = new WorldView.Text(message, color, true, 1, true)
@@ -101,12 +97,16 @@ animateTextOutward = (text, direction) ->
   # d = world.addPin(47,2,0xcc0000) #france
   # e = world.addPin(-90,0,0xcc0000) #antarctica
   # j = world.addPin(35.6833, 139.7667, 0x00ff00)  #japan
+
   # k = world.addPin(-4.3250, 15.3222, 0x0000f0)   #kinshasa
   # m = world.addPin(-34.8836, -56.1819, 0x00045f)  #montevideo
   # la = world.addPin(34.05,-118.25, 0xccc000)  # l.a
   # ny = world.addPin(40.712,-74.006, 0x000ccc)  # ny
+
   # perm = world.addPin(50,56)
+
   # boulder = world.addPin(40,-105)
+
 
   # arc1 = world.drawArc(c,perm)
   # arc2 = world.drawArc(c,boulder)
