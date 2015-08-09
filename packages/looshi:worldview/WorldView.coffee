@@ -1,29 +1,64 @@
+###*
+ * @class WorldView.World
+ * @description 3D model of the earth with latitude/longitude data representations
+ *
+ *    world = WorldView.World(options)
+ *
+ * @param {Object} options object
+ *
+ * - `renderTo` : String dom node selector to append the world to
+ * - `earthImagePath` : String path to the earth image texture (optional)
+ * - `backgroundColor`: Number hex value for the background color
+ * - `series` : Array Array of series data objects
+ *
+ * - options.series data object
+ * - `name` : String name of series
+ * - `type` : String 3D object which represents each data item
+ * - `color`: Number Color of 3D object
+ * - `data`: Array of data items in the format :
+ * -`[latitude,longitude,amount,Date (optional),label (optional)]`
+ *
 ###
-WorldView.World
-  3D interactive model of a world
-  for now just the Earth, but we can add other worlds pretty easily
-###
-
 class WorldView.World
 
-  constructor: (@earthTexture) ->
-    @renderer = new THREE.WebGLRenderer({antialias:true})
+  VECTOR_ZERO = new THREE.Vector3()  # 0,0,0 point
+  ITEM_SCALE = .05                   # non-earth items scale
+  DEFAULT_TEXTURE = '/packages/looshi_worldview/assets/earthmap4k.jpg'
+  RECTANGLE = 'rectangle'
+  CYLINDER = 'cylinder'
+  SPHERE = 'sphere'
+
+  constructor: (options = {}) ->
+    # options setup
+    @earthImagePath = options.earthImagePath ? DEFAULT_TEXTURE
+    @domNode = options.renderTo ? null
+    @backgroundColor = options.backgroundColor ? 0x000000
+    @data = options.series ? []
+
+    # renderer setup
+    @renderer = new THREE.WebGLRenderer(antialias:true)
     @renderer.shadowMapEnabled = true
     @renderer.autoClear = false
+    @renderer.setClearColor(@backgroundColor, 1)
     @mainScene = new THREE.Scene()
-    @zScene = new THREE.Scene() # items in "z" scene appear above mainScene
+    @zScene = new THREE.Scene()      # zScene renders above mainScene
     @pins = []
     @flags = []
-    @texts = []
     @camera = null
     @controls = null
     @earthParent = null
     @earth = null
-    @earthTexture ?= undefined
+    if @domNode
+      @appendTo( $(@domNode) )
 
-  VECTOR_ZERO = new THREE.Vector3()  # 0,0,0 point
-  ITEM_SCALE = .05                   # non-earth items scale
 
+  ###
+  * Renders scene.
+  * Automatically called in all of the 'add' methods, addPin, addFlag, etc.
+  * You only need to call this function if manually adding your own objects
+  * to the scene.
+  * @method renderCameraMove
+  ###
   renderCameraMove : =>
     # scale pins inversely proportional to zoom
     cameraDistance = Math.log( @camera.position.distanceTo(VECTOR_ZERO) - 1 )
@@ -31,7 +66,7 @@ class WorldView.World
     for pin in @pins
       pin.scale.set(scalePin, scalePin, scalePin)
     for flag in @flags
-      flag.lookAt(@camera.position)
+      flag.setRotationFromQuaternion( @camera.quaternion )
       # manually hide flags when they go behind earth when
       # the angle at Vector Zero for the triangle flag,0,camera > 90 degrees
       a = WorldView.getDistance(@camera.position,flag.position)
@@ -77,50 +112,114 @@ class WorldView.World
     @earthParent = new THREE.Object3D()
     @mainScene.add(@camera)
     @mainScene.add( @earthParent )
-    @earth = new WorldView.Earth(@earthTexture, @renderCameraMove)
+    @earth = new WorldView.Earth(@earthImagePath, @renderCameraMove)
     @earthParent.add(@earth)
     @mainScene.add(@earthParent)
     @addLighting()
     @renderCameraMove()
     return @earthParent
 
+  ###
+  * Adds a half sphere at the given location.
+  * @method addPin
+  * @param {Number} latitude
+  * @param {Number} longitude
+  * @param {Number} color
+  * @return returns the 3D pin object.
+  ###
   addPin : (lat, long, color) ->
     pin = new WorldView.Pin(lat, long, color)
-    @addToSurface(pin, lat, long)
     @pins.push(pin)
-    @renderCameraMove()
+    @addToSurface(pin, lat, long)
     pin
 
+  ###
+  * @method getPin
+  * @param {Number} latitude
+  * @param {Number} longitude
+  * @return returns the 3D pin object or null if no pin exists at this location.
+  ###
   getPin : (lat, long) ->
     _.find @pins, (pin) ->
       pin.lat is lat and pin.long is long
 
+  ###
+  * Adds a flag object with text at the given location.
+  * @method addFlag
+  * @param {Number} latitude
+  * @param {Number} longitude
+  * @param {Number} color The color of the flag.
+  * @param {String} text The text which appears on the flag.
+  * @return returns the 3D flag object.
+  ###
   addFlag : (lat, long, color, text) ->
     flag = new WorldView.Flag(lat, long, color, text)
-    @addToSurface(flag, lat, long)
-    @renderCameraMove()
+    @addToSurface(flag, lat, long, @zScene)
+    WorldView.lookAwayFrom(flag, @earthParent)
     @flags.push(flag)
     flag
 
-  addToSurface : (obj, lat, long) ->
-    @zScene.add(obj)
+  ###
+  * Adds any 3D object to the surface of the earth.
+  * @method addToSurface
+  * @param {THREE.Object3D} object THREE.Object3D object.
+  * @param {Number} latitude
+  * @param {Number} longitude
+  * @return returns the 3D object.
+  ###
+  addToSurface : (obj, lat, long, scene) ->
+    scene ?= @mainScene
+    scene.add(obj)
     point = WorldView.latLongToVector3(lat, long, 2, 0)
     obj.position.set(point.x, point.y, point.z)
     obj.scale.set(ITEM_SCALE, ITEM_SCALE, ITEM_SCALE)
+    @renderCameraMove()
     obj
 
+  ###
+  * Adds any 3D object to the scene.
+  * @method add
+  * @param {THREE.Object3D} object THREE.Object3D object.
+  * @return returns nothing.
+  ###
   add : (obj) ->
-    @earthParent.add(obj)
+    @mainScene.add(obj)
+    @renderCameraMove()
 
+  ###
+  * Removes 3D object from the scene.
+  * @method remove
+  * @param {THREE.Object3D} object THREE.Object3D object.
+  * @return returns nothing.
+  ###
   remove : (obj) ->
-    @earthParent.remove(obj)
+    @mainScene.remove(obj)
+    @renderCameraMove()
 
-  drawArc : (fromLat, fromLong, toLat, toLong, color) ->
+  ###
+  * Draws an arc between two coordinates on the earth.
+  * @method add
+  * @param {Number} fromLat
+  * @param {Number} fromLong
+  * @param {Number} toLat
+  * @param {Number} toLong
+  * @param {Number} color The color of the arc.
+  * @return returns nothing.
+  ###
+  addArc : (fromLat, fromLong, toLat, toLong, color) ->
     arc = new WorldView.Arc(fromLat, fromLong, toLat, toLong, color)
     @earthParent.add(arc)
     @renderScene()
     arc
 
+  ###
+  * Animates an object along an arc.
+  * @method animateObjectOnArc
+  * @param {WorldView.Arc} arc The Arc object to animate along.
+  * @param {THREE.Object3D} object Object to move along arc.
+  * @param {Number} duration Duration for the animation.
+  * @return returns nothing.
+  ###
   animateObjectOnArc = (arc, obj, duration) ->
     if not obj['positionOnArc']
       obj.positionOnArc = duration
@@ -161,4 +260,5 @@ WorldView.lookAwayFrom = (object, target) ->
   vector = new THREE.Vector3()
   vector.subVectors(object.position, target.position).add(object.position)
   object.lookAt(vector)
+
 

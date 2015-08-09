@@ -34,5 +34,6 @@ class WorldView.Flag extends THREE.Group
 
     super()
     @add(shapeMesh)
+    # shapeMesh.add(new THREE.AxisHelper())
     @add(text)
     text.position.set(padding, flagH+padding,.1)
