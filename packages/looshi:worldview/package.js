@@ -17,6 +17,8 @@ Package.onUse(function(api){
   api.add_files('models/Arc.coffee');
   api.add_files('models/Text.coffee');
   api.add_files('models/Flag.coffee');
+  api.add_files('models/Cube.coffee');
+  api.add_files('models/Cylinder.coffee');
   api.add_files('WorldView.coffee','client');
   api.add_files('assets/earthmap4k.jpg','client');
 

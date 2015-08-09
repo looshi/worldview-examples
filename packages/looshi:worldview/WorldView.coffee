@@ -1,8 +1,8 @@
 ###*
  * @class WorldView.World
- * @description 3D model of the earth with latitude/longitude data representations
+ * @description 3D model of the earth with lat/long data representations
  *
- *    world = WorldView.World(options)
+ * world = WorldView.World(options)
  *
  * @param {Object} options object
  *
@@ -11,12 +11,6 @@
  * - `backgroundColor`: Number hex value for the background color
  * - `series` : Array Array of series data objects
  *
- * - options.series data object
- * - `name` : String name of series
- * - `type` : String 3D object which represents each data item
- * - `color`: Number Color of 3D object
- * - `data`: Array of data items in the format :
- * -`[latitude,longitude,amount,Date (optional),label (optional)]`
  *
 ###
 class WorldView.World
@@ -24,16 +18,13 @@ class WorldView.World
   VECTOR_ZERO = new THREE.Vector3()  # 0,0,0 point
   ITEM_SCALE = .05                   # non-earth items scale
   DEFAULT_TEXTURE = '/packages/looshi_worldview/assets/earthmap4k.jpg'
-  RECTANGLE = 'rectangle'
-  CYLINDER = 'cylinder'
-  SPHERE = 'sphere'
 
   constructor: (options = {}) ->
     # options setup
     @earthImagePath = options.earthImagePath ? DEFAULT_TEXTURE
     @domNode = options.renderTo ? null
     @backgroundColor = options.backgroundColor ? 0x000000
-    @data = options.series ? []
+    @series = options.series ? []
 
     # renderer setup
     @renderer = new THREE.WebGLRenderer(antialias:true)
@@ -50,13 +41,10 @@ class WorldView.World
     @earth = null
     if @domNode
       @appendTo( $(@domNode) )
-
+    @addSeriesObjects(@series)
 
   ###
-  * Renders scene.
-  * Automatically called in all of the 'add' methods, addPin, addFlag, etc.
-  * You only need to call this function if manually adding your own objects
-  * to the scene.
+  * Renders the scene.  Applies proportional scaling to surface objects.
   * @method renderCameraMove
   ###
   renderCameraMove : =>
@@ -66,10 +54,10 @@ class WorldView.World
     for pin in @pins
       pin.scale.set(scalePin, scalePin, scalePin)
     for flag in @flags
-      flag.setRotationFromQuaternion( @camera.quaternion )
+      flag.setRotationFromQuaternion(@camera.quaternion)
       # manually hide flags when they go behind earth when
       # the angle at Vector Zero for the triangle flag,0,camera > 90 degrees
-      a = WorldView.getDistance(@camera.position,flag.position)
+      a = WorldView.getDistance(@camera.position, flag.position)
       b = WorldView.getDistance(flag.position, VECTOR_ZERO)
       c = WorldView.getDistance(@camera.position, VECTOR_ZERO)
       Angle = (b*b + c*c - a*a) / (2*b*c)
@@ -83,6 +71,21 @@ class WorldView.World
 
     @renderScene()
 
+  ###
+  * Renders the scene.  Does not apply proportional scaling of surface objects.
+  *
+  * Automatically called in all of the 'add' methods, addPin, addFlag, etc.
+  * You only need to call this function if you are manually manipulating
+  * the scene outside the API calls available.
+  *
+  * Example
+  *
+  * myCube = new THREE.Mesh( myGeometry, myMaterial );
+  * myWorld.add( myCube );        // scene will be automatically rendered
+  * myCube.position.set(3, 3, 3); // make some changes later
+  * world.renderScene();          // now you'll need to call render
+  * @method renderScene
+  ###
   renderScene : ->
     @renderer.clear()
     @renderer.render(@mainScene, @camera)
@@ -97,6 +100,7 @@ class WorldView.World
     light.castShadow = true
     light.position.set(-15, 8, -20)
     light.castShadow  = true
+    @zScene.add(light.clone())
     @camera.add(light)
 
   appendTo : (domNode) ->
@@ -109,9 +113,8 @@ class WorldView.World
     @controls = new THREE.OrbitControls(@camera, domNode[0])
     @controls.damping = 0.2
     @controls.addEventListener('change', @renderCameraMove)
-    @earthParent = new THREE.Object3D()
     @mainScene.add(@camera)
-    @mainScene.add( @earthParent )
+    @earthParent = new THREE.Group()
     @earth = new WorldView.Earth(@earthImagePath, @renderCameraMove)
     @earthParent.add(@earth)
     @mainScene.add(@earthParent)
@@ -120,7 +123,7 @@ class WorldView.World
     return @earthParent
 
   ###
-  * Adds a half sphere at the given location.
+  * Adds a 3D pin object at the given location.
   * @method addPin
   * @param {Number} latitude
   * @param {Number} longitude
@@ -160,6 +163,36 @@ class WorldView.World
     flag
 
   ###
+  * Adds a cube object at the given location.
+  * @method addCube
+  * @param {Number} latitude
+  * @param {Number} longitude
+  * @param {Number} color
+  * @param {Number} size The height of the cube.
+  * @return returns the 3D cube object.
+  ###
+  addCube : (lat, long, color, size) ->
+    cube = new WorldView.Cube(lat, long, color, size)
+    @addToSurface(cube, lat, long)
+    WorldView.lookAwayFrom(cube, @earthParent)
+    cube
+
+  ###
+  * Adds a cylinder object at the given location.
+  * @method addCube
+  * @param {Number} latitude
+  * @param {Number} longitude
+  * @param {Number} color
+  * @param {Number} size The height of the cube.
+  * @return returns the 3D cube object.
+  ###
+  addCylinder : (lat, long, color, size) ->
+    cylinder = new WorldView.Cylinder(lat, long, color, size)
+    @addToSurface(cylinder, lat, long)
+    WorldView.lookAwayFrom(cylinder, @earthParent)
+    cylinder
+
+  ###
   * Adds any 3D object to the surface of the earth.
   * @method addToSurface
   * @param {THREE.Object3D} object THREE.Object3D object.
@@ -195,6 +228,51 @@ class WorldView.World
   remove : (obj) ->
     @mainScene.remove(obj)
     @renderCameraMove()
+
+  ###
+  * Adds data items to the surface.
+  *
+  * series objects are in the format :
+  *
+  * - `name` : String name of series
+  * - `type` : String 3D object which represents each data item
+  * - `color`: Number Color of 3D object
+  * - `data`: Array of series.data Arrays
+  *
+  * series.data Arrays are in the format (order matters ) :
+  *
+  * - [latitude,
+  * - longitude,
+  * - amount(optional),
+  * - color(optional),
+  * - label (optional),
+  * - date (optional)]
+  *
+  * @method addSeriesObjects
+  * @param {Object} options.series object
+  * @return returns nothing.
+  ###
+  addSeriesObjects : (series) ->
+    for s in series
+      color = s.color
+      scale = s.scale
+      for data in s.data
+        lat = data[0]
+        long = data[1]
+        itemColor = data[2]
+        itemColor ?= s.color
+        amount = data[3]
+        label = data[4]
+        date = data[5]
+        @_addObjectByType(s.type, lat, long, itemColor, amount*scale, label)
+
+
+  _addObjectByType : (type, lat, long, color, size, label) ->
+    switch type
+      when WorldView.PIN then @addPin(lat, long, color, size)
+      when WorldView.FLAG then @addFlag(lat, long, color, label)
+      when WorldView.CUBE then @addCube(lat, long, color, size)
+      when WorldView.CYLINDER then @addCylinder(lat, long, color, size)
 
   ###
   * Draws an arc between two coordinates on the earth.
@@ -236,6 +314,14 @@ class WorldView.World
         @renderScene()
       ), 1000
 
+# ----------  WorldView Constants -------------------- #
+
+WorldView.CUBE = 'cube'
+WorldView.CYLINDER = 'cylinder'
+WorldView.SPHERE = 'sphere'
+WorldView.PIN = 'pin'
+WorldView.FLAG = 'flag'
+
 # ----------  WorldView Helper Functions ------------- #
 
 WorldView.latLongToVector3 = (lat, lon, radius, height) ->
@@ -252,7 +338,7 @@ WorldView.getPointInBetween = (pointA, pointB, percentage) ->
   dir = dir.normalize().multiplyScalar(len*percentage)
   return pointA.clone().add(dir)
 
-WorldView.getDistance = (pointA,pointB) ->
+WorldView.getDistance = (pointA, pointB) ->
   dir = pointB.clone().sub(pointA)
   return dir.length()
 

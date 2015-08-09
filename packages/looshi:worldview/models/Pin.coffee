@@ -1,6 +1,6 @@
 ###
 WorldView.Pin
-  Sphere shape.
+  Sphere shape.  TODO : make a tear drop shape.
 ###
 class WorldView.Pin extends THREE.Mesh
 
@@ -15,5 +15,5 @@ class WorldView.Pin extends THREE.Mesh
     geom = new THREE.SphereGeometry(1, 16, 16)
     mat = new THREE.MeshPhongMaterial( { color: color } )
     super( geom, mat )
-    scale = .01
-    @scale.set(scale,scale,scale)
+    # scale = .01
+    # @scale.set(scale,scale,scale)
