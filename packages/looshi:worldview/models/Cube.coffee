@@ -4,9 +4,10 @@ WorldView.Cube
 ###
 class WorldView.Cube extends THREE.Group
 
-  constructor: (lat, long, color, size) ->
+  constructor: (lat, long, color, size, girth) ->
     color ?= 0xffffff
     size ?= 1
+    girth ?= 1
 
     @color = color
     @lat = lat
@@ -17,7 +18,7 @@ class WorldView.Cube extends THREE.Group
     mat = new THREE.MeshPhongMaterial( { color: color } )
     cube = new THREE.Mesh( geom, mat )
 
-    cube.scale.set(1, 1, size)
+    cube.scale.set(girth, girth, size)
 
     super()
     @add cube

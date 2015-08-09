@@ -4,9 +4,11 @@ WorldView.Cylinder
 ###
 class WorldView.Cylinder extends THREE.Group
 
-  constructor: (lat, long, color, size) ->
+  constructor: (lat, long, color, size, girth) ->
     color ?= 0xffffff
     size ?= 1
+    console.log 'girth', girth
+    girth ?= 1
 
     @color = color
     @lat = lat
@@ -16,9 +18,8 @@ class WorldView.Cylinder extends THREE.Group
     geom = new THREE.CylinderGeometry( 1, 1, 1, 20 )
     mat = new THREE.MeshPhongMaterial( { color: color } )
     cylinder = new THREE.Mesh( geom, mat )
-    console.log 'clyinder r', cylinder.rotation
 
-    cylinder.scale.set(1, size, 1 )
+    cylinder.scale.set(girth, size, girth )
     cylinder.rotation.x = Math.PI / 2
 
     super()

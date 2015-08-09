@@ -31,7 +31,8 @@ Template.Earth.onRendered ->
       name: "First Series",
       type : WorldView.CUBE,
       color: 0xcc0000,
-      scale: 50
+      scale: 50,
+      girth: 1,
       data: [
         [35.6833, 139.7667, 0xcc0000,'Japan',Date.UTC(1970, 9, 21)],
         [40.712,-74.006, 0x000ccc,0.28,'New York',Date.UTC(1970, 10, 4)],
@@ -39,7 +40,8 @@ Template.Earth.onRendered ->
       name: "Cylinders",
       type : WorldView.CYLINDER,
       color: 0x003322,
-      scale: 50
+      scale: 25,
+      girth: 2,
       data: [
         [50,56, 0x000ccc, 0.25,'perm',Date.UTC(1970, 10, 9)],
         [40,-105, 0xcc0000, 0.2,'Boulder',Date.UTC(1970, 10, 27)],
@@ -48,7 +50,7 @@ Template.Earth.onRendered ->
       name: "Second Series",
       type : WorldView.PIN,
       color: 0x00ffcc,
-      scale: .01
+      scale: .01,
       data: [
         [-34.6033,-58.3817,2,null,'Buenos Aires', Date.UTC(1970, 9, 21)],
         [48.856,2.3508,3,null, 'Paris', Date.UTC(1970, 10, 4)],
@@ -58,7 +60,7 @@ Template.Earth.onRendered ->
       name: "Third Series",
       type : WorldView.FLAG,
       color: 0x88cccc,
-      scale: 1
+      scale: 1,
       data: [
         [-34.6033,-58.3817,2,null,'Buenos Aires', Date.UTC(1970, 9, 21)],
         [48.856,2.3508,4,null, 'Paris', Date.UTC(1970, 10, 4)],

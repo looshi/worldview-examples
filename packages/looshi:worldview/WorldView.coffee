@@ -171,8 +171,8 @@ class WorldView.World
   * @param {Number} size The height of the cube.
   * @return returns the 3D cube object.
   ###
-  addCube : (lat, long, color, size) ->
-    cube = new WorldView.Cube(lat, long, color, size)
+  addCube : (lat, long, color, size, girth) ->
+    cube = new WorldView.Cube(lat, long, color, size, girth)
     @addToSurface(cube, lat, long)
     WorldView.lookAwayFrom(cube, @earthParent)
     cube
@@ -186,8 +186,8 @@ class WorldView.World
   * @param {Number} size The height of the cube.
   * @return returns the 3D cube object.
   ###
-  addCylinder : (lat, long, color, size) ->
-    cylinder = new WorldView.Cylinder(lat, long, color, size)
+  addCylinder : (lat, long, color, size, girth) ->
+    cylinder = new WorldView.Cylinder(lat, long, color, size, girth)
     @addToSurface(cylinder, lat, long)
     WorldView.lookAwayFrom(cylinder, @earthParent)
     cylinder
@@ -256,6 +256,7 @@ class WorldView.World
     for s in series
       color = s.color
       scale = s.scale
+      console.log 's', s
       for data in s.data
         lat = data[0]
         long = data[1]
@@ -264,15 +265,22 @@ class WorldView.World
         amount = data[3]
         label = data[4]
         date = data[5]
-        @_addObjectByType(s.type, lat, long, itemColor, amount*scale, label)
+        @_addObjectByType(
+          s.type,
+          lat,
+          long,
+          itemColor,
+          amount*scale,
+          label,
+          s.girth)
 
 
-  _addObjectByType : (type, lat, long, color, size, label) ->
+  _addObjectByType : (type, lat, long, color, size, label, girth) ->
     switch type
       when WorldView.PIN then @addPin(lat, long, color, size)
       when WorldView.FLAG then @addFlag(lat, long, color, label)
-      when WorldView.CUBE then @addCube(lat, long, color, size)
-      when WorldView.CYLINDER then @addCylinder(lat, long, color, size)
+      when WorldView.CUBE then @addCube(lat, long, color, size, girth)
+      when WorldView.CYLINDER then @addCylinder(lat, long, color, size, girth)
 
   ###
   * Draws an arc between two coordinates on the earth.
