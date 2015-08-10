@@ -22,9 +22,11 @@ class WorldView.Cylinder extends THREE.Group
     # scale order is different since we rotate 90 down below
     cylinder.scale.set(newScale.x, newScale.z, newScale.y )
 
-    zOffset = WorldView.getObjectSurfaceOffset(cylinder)
+
+    zOffset = WorldView.getObjectSurfaceOffset(cylinder.scale.y)
+    console.log 's', cylinder.scale.y, zOffset
     unless grow is WorldView.WIDTH
-      zOffset = (amount/2) - zOffset
+      zOffset = (amount/2) - zOffset*2 # strange, but have to zOffset*2 here
     cylinder.position.set(0, 0, zOffset)
     # rotate 90 so the cylinder points outward from the earth
     cylinder.rotation.x = Math.PI / 2

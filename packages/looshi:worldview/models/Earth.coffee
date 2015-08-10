@@ -12,7 +12,7 @@ class WorldView.Earth
       imagepath,
       THREE.UVMapping,
       doneLoading )
-    @earthMaterial.transparent = true
-    @earthMaterial.opacity = .5
+    # @earthMaterial.transparent = true
+    # @earthMaterial.opacity = .5
     @earth = new THREE.Mesh( @earthGeometry, @earthMaterial )
     return @earth

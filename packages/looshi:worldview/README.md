@@ -44,7 +44,7 @@ Adds a 3D pin object at the given location.
 
 ###### Return:
 
-* **** returns the 3D pin object.
+* returns the 3D pin object.
 
 ##### getPin(latitude, longitude)
 
@@ -55,7 +55,7 @@ Adds a 3D pin object at the given location.
 
 ###### Return:
 
-* **** returns the 3D pin object or null if no pin exists at this location.
+* returns the 3D pin object or null if no pin exists at this location.
 
 ##### addFlag(options)
 
@@ -67,7 +67,7 @@ Adds a flag object with text at the given location.
 
 ###### Return:
 
-* **** returns the 3D flag object.
+* returns the 3D flag object.
 
 ##### addCube(options)
 
@@ -79,9 +79,9 @@ Adds a cube object at the given location.
 
 ###### Return:
 
-* **** returns the 3D cube object.
+* returns the 3D cube object.
 
-##### addCube(options)
+##### addCylinder(options)
 
 Adds a cylinder object at the given location.
 
@@ -91,7 +91,7 @@ Adds a cylinder object at the given location.
 
 ###### Return:
 
-* **** returns the 3D cube object.
+* returns the 3D cube object.
 
 ##### addToSurface(object, latitude, longitude)
 
@@ -105,7 +105,7 @@ Adds any 3D object to the surface of the earth.
 
 ###### Return:
 
-* **** returns the 3D object.
+* returns the 3D object.
 
 ##### add(object)
 
@@ -117,7 +117,7 @@ Adds any 3D object to the scene.
 
 ###### Return:
 
-* **** returns nothing.
+* returns nothing.
 
 ##### remove(object)
 
@@ -129,7 +129,7 @@ Removes 3D object from the scene.
 
 ###### Return:
 
-* **** returns nothing.
+* returns nothing.
 
 ##### addSeriesObjects(options.series)
 
@@ -149,7 +149,6 @@ series.data Arrays are in the format (order matters ) :
 - amount(optional),
 - color(optional),
 - label (optional),
-- date (optional)]
 
 ###### Params:
 
@@ -157,7 +156,7 @@ series.data Arrays are in the format (order matters ) :
 
 ###### Return:
 
-* **** returns nothing.
+* returns nothing.
 
 ##### add(fromLat, fromLong, toLat, toLong, color)
 
@@ -173,7 +172,7 @@ Draws an arc between two coordinates on the earth.
 
 ###### Return:
 
-* **** returns nothing.
+* returns nothing.
 
 ##### animateObjectOnArc(arc, object, duration)
 
@@ -187,7 +186,7 @@ Animates an object along an arc.
 
 ###### Return:
 
-* **** returns nothing.
+* returns nothing.
 
 <!-- End WorldView.coffee -->
 

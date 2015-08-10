@@ -36,8 +36,8 @@ Template.Earth.onRendered ->
       grow: WorldView.HEIGHT,
       opacity: .6,
       data: [
-        [35.6833, 139.7667, 0xcc0000, 0.5,'Japan',Date.UTC(1970, 9, 21)],
-        [40.712,-74.006, 0x000ccc, 0.28,'New York',Date.UTC(1970, 10, 4)],
+        [35.6833, 139.7667, 0xcc0000, 0.5,'Japan'],
+        [40.712,-74.006, 0x000ccc, 0.28,'New York'],
       ]},{
       name: "Cylinders",
       type : WorldView.PIN,
@@ -47,28 +47,28 @@ Template.Earth.onRendered ->
       opacity: .7,
       grow: WorldView.WIDTH,
       data: [
-        [50,56, 0x0cc0000, 0.25,'perm',Date.UTC(1970, 10, 9)],
-        [40,-105, 0xcc0000, 0.2,'Boulder',Date.UTC(1970, 10, 27)],
-        [-35.3,149.1,0x0cc0000, 0.28,'Australia',Date.UTC(1970, 11, 2)]
+        [50,56, 0x0cc0000, 0.25,'perm'],
+        [40,-105, 0xcc0000, 0.2,'Boulder'],
+        [-35.3,149.1,0x0cc0000, 0.28,'Australia']
       ]},{
       name: "Second Series",
       type : WorldView.FLAG,
       color: 0x00cc00,
       scale: 4,
-      opacity: .6,
-      grow: WorldView.BOTH,
+      opacity: .5,
       data: [
-        [-34.6033,-58.3817,null,2,'Buenos Aires', Date.UTC(1970, 9, 21)],
-        [48.856,2.3508,null,3, 'Paris', Date.UTC(1970, 10, 4)],
+        [-34.6033,-58.3817,null,2,'Buenos Aires'],
+        [48.856,2.3508,null,3, 'Paris'],
       ]},{
       name: "Third Series",
       type : WorldView.CYLINDER,
       color: 0x88cccc,
       scale: 1,
       opacity: .8,
+      grow: WorldView.BOTH,
       data: [
-        [50.0614,19.9383,null,5,'Krakow', Date.UTC(1970, 10, 9)],
-        [-33.9253,18.4239,null,7,'Cape Town', Date.UTC(1970, 10, 27)]
+        [50.0614,19.9383,null,5,'Krakow'],
+        [-33.9253,18.4239,null,7,'Cape Town']
       ]}
     ]
 

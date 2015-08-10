@@ -171,7 +171,7 @@ class WorldView.World
 
   ###
   * Adds a cylinder object at the given location.
-  * @method addCube
+  * @method addCylinder
   * @param {WorldView.ItemOptions} options
   * @return returns the 3D cube object.
   ###
@@ -236,7 +236,6 @@ class WorldView.World
   * - amount(optional),
   * - color(optional),
   * - label (optional),
-  * - date (optional)]
   *
   * @method addSeriesObjects
   * @param {Object} options.series object
@@ -253,7 +252,7 @@ class WorldView.World
           color : itemColor
           amount : data[3]
           label : data[4]
-          date : data[5]
+          opacity : s.opacity
           scale : s.scale
           grow : s.grow
           girth : s.girth
@@ -346,10 +345,10 @@ WorldView.lookAwayFrom = (object, target) ->
 # object position is adjusted toward the center of the earth slightly
 # so it does not just sit ontop as a tangent
 # stack exchange description with image : http://bit.ly/1EiBj3O
-WorldView.getObjectSurfaceOffset = (object) ->
+WorldView.getObjectSurfaceOffset = (girth) ->
   r = 2 / WorldView.ITEM_SCALE # earth radius in Item Units
-  a = object.scale.x  # girth of the object
-  r - Math.sqrt(r*r-a*a/4)
+  a = girth  # girth of the object
+  r - Math.sqrt(r*r-a*a/2)
 
 WorldView.getObjectGrowScale = (options) ->
   {grow, girth, height, amount} = options
