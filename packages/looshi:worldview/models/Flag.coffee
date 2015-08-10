@@ -5,11 +5,10 @@ WorldView.Flag
 
 class WorldView.Flag extends THREE.Group
 
-  constructor: (lat, long, color, text) ->
-    @lat = lat
-    @long = long
+  constructor: (options) ->
+    {@lat, @long, color, opacity, label} = options
 
-    text = new WorldView.Text(text, 0xffffff, false, .0001)
+    text = new WorldView.Text(label, 0xffffff, false, .0001)
 
     padding = .4  # adds padding around the text inside the rectangle
     rectW = text.width + (padding * 2.5)
@@ -27,10 +26,10 @@ class WorldView.Flag extends THREE.Group
 
     points = flagShape.createPointsGeometry()
     geometry = new THREE.ShapeGeometry(flagShape)
-
-    shapeMesh = new THREE.Mesh(
-      geometry,
-      new THREE.MeshPhongMaterial({color: color, side: THREE.DoubleSide }))
+    sMat = new THREE.MeshPhongMaterial({color: color, side: THREE.DoubleSide})
+    shapeMesh = new THREE.Mesh(geometry,sMat)
+    sMat.transparent = true
+    sMat.opacity = opacity
 
     super()
     @add(shapeMesh)

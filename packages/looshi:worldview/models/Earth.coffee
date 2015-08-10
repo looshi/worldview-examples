@@ -5,7 +5,6 @@ WorldView.Earth
 ###
 
 class WorldView.Earth
-
   constructor: (imagepath, doneLoading) ->
     @earthGeometry = new THREE.SphereGeometry(2, 32, 32)
     @earthMaterial = new THREE.MeshPhongMaterial()
@@ -13,5 +12,7 @@ class WorldView.Earth
       imagepath,
       THREE.UVMapping,
       doneLoading )
+    @earthMaterial.transparent = true
+    @earthMaterial.opacity = .5
     @earth = new THREE.Mesh( @earthGeometry, @earthMaterial )
     return @earth

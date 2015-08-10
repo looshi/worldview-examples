@@ -4,21 +4,25 @@ WorldView.Cube
 ###
 class WorldView.Cube extends THREE.Group
 
-  constructor: (lat, long, color, size, girth) ->
-    color ?= 0xffffff
-    size ?= 1
-    girth ?= 1
+  constructor: (options) ->
+    {@lat, @long, amount, color, opacity} = options
+    {girth, height, grow, scale} = options
 
-    @color = color
-    @lat = lat
-    @long = long
-    @size = size
+    geom = new THREE.BoxGeometry(1, 1, 1)
+    mat = new THREE.MeshPhongMaterial(color: color)
+    mat.transparent = true
+    mat.opacity = options.opacity
+    cube = new THREE.Mesh(geom, mat)
 
-    geom = new THREE.BoxGeometry( 1, 1, 1 )
-    mat = new THREE.MeshPhongMaterial( { color: color } )
-    cube = new THREE.Mesh( geom, mat )
-
-    cube.scale.set(girth, girth, size)
+    # calculate scale and position
+    amount = amount * scale
+    options.amount = amount
+    newScale = WorldView.getObjectGrowScale(options)
+    cube.scale.set(newScale.x, newScale.y, newScale.z)
+    zOffset = WorldView.getObjectSurfaceOffset(cube)
+    unless grow is WorldView.WIDTH
+      zOffset = (amount/2) - zOffset
+    cube.position.set(0, 0, zOffset)
 
     super()
     @add cube

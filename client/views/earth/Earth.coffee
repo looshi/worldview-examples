@@ -29,47 +29,50 @@ Template.Earth.onRendered ->
     backgroundColor: 0x000000,
     series: [{
       name: "First Series",
-      type : WorldView.CUBE,
+      type : WorldView.CYLINDER,
       color: 0xcc0000,
       scale: 50,
       girth: 1,
+      grow: WorldView.HEIGHT,
+      opacity: .6,
       data: [
-        [35.6833, 139.7667, 0xcc0000,'Japan',Date.UTC(1970, 9, 21)],
-        [40.712,-74.006, 0x000ccc,0.28,'New York',Date.UTC(1970, 10, 4)],
+        [35.6833, 139.7667, 0xcc0000, 0.5,'Japan',Date.UTC(1970, 9, 21)],
+        [40.712,-74.006, 0x000ccc, 0.28,'New York',Date.UTC(1970, 10, 4)],
       ]},{
       name: "Cylinders",
-      type : WorldView.CYLINDER,
+      type : WorldView.PIN,
       color: 0x003322,
       scale: 25,
-      girth: 2,
+      height: .2,
+      opacity: .7,
+      grow: WorldView.WIDTH,
       data: [
-        [50,56, 0x000ccc, 0.25,'perm',Date.UTC(1970, 10, 9)],
+        [50,56, 0x0cc0000, 0.25,'perm',Date.UTC(1970, 10, 9)],
         [40,-105, 0xcc0000, 0.2,'Boulder',Date.UTC(1970, 10, 27)],
-        [-35.3,149.1,0x222222, 0.28,'Australia',Date.UTC(1970, 11, 2)]
+        [-35.3,149.1,0x0cc0000, 0.28,'Australia',Date.UTC(1970, 11, 2)]
       ]},{
       name: "Second Series",
-      type : WorldView.PIN,
-      color: 0x00ffcc,
-      scale: .01,
+      type : WorldView.FLAG,
+      color: 0x00cc00,
+      scale: 4,
+      opacity: .6,
+      grow: WorldView.BOTH,
       data: [
-        [-34.6033,-58.3817,2,null,'Buenos Aires', Date.UTC(1970, 9, 21)],
-        [48.856,2.3508,3,null, 'Paris', Date.UTC(1970, 10, 4)],
-        [50.0614,19.9383,4,null,'Krakow', Date.UTC(1970, 10, 9)],
-        [-33.9253,18.4239,5,null,'Cape Town', Date.UTC(1970, 10, 27)]
+        [-34.6033,-58.3817,null,2,'Buenos Aires', Date.UTC(1970, 9, 21)],
+        [48.856,2.3508,null,3, 'Paris', Date.UTC(1970, 10, 4)],
       ]},{
       name: "Third Series",
-      type : WorldView.FLAG,
+      type : WorldView.CYLINDER,
       color: 0x88cccc,
       scale: 1,
+      opacity: .8,
       data: [
-        [-34.6033,-58.3817,2,null,'Buenos Aires', Date.UTC(1970, 9, 21)],
-        [48.856,2.3508,4,null, 'Paris', Date.UTC(1970, 10, 4)],
-        [50.0614,19.9383,5,null,'Krakow', Date.UTC(1970, 10, 9)],
-        [-33.9253,18.4239,7,null,'Cape Town', Date.UTC(1970, 10, 27)]
+        [50.0614,19.9383,null,5,'Krakow', Date.UTC(1970, 10, 9)],
+        [-33.9253,18.4239,null,7,'Cape Town', Date.UTC(1970, 10, 27)]
       ]}
     ]
 
-  console.log 'options', options
+
   world = new WorldView.World(options)
   # earthModel = world.appendTo( $('#earthContainer') )
 

@@ -4,16 +4,11 @@ WorldView.Pin
 ###
 class WorldView.Pin extends THREE.Mesh
 
-  constructor: (lat,long,color) ->
-
-    color ?= 0xff0000  # default to red if no color specified
-
-    @color = color
-    @lat = lat
-    @long = long
+  constructor: (options) ->
+    {@lat, @long, color, opacity} = options
 
     geom = new THREE.SphereGeometry(1, 16, 16)
     mat = new THREE.MeshPhongMaterial( { color: color } )
+    mat.transparent = true
+    mat.opacity = opacity
     super( geom, mat )
-    # scale = .01
-    # @scale.set(scale,scale,scale)

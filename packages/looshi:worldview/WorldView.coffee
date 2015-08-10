@@ -16,7 +16,6 @@
 class WorldView.World
 
   VECTOR_ZERO = new THREE.Vector3()  # 0,0,0 point
-  ITEM_SCALE = .05                   # non-earth items scale
   DEFAULT_TEXTURE = '/packages/looshi_worldview/assets/earthmap4k.jpg'
 
   constructor: (options = {}) ->
@@ -50,7 +49,7 @@ class WorldView.World
   renderCameraMove : =>
     # scale pins inversely proportional to zoom
     cameraDistance = Math.log( @camera.position.distanceTo(VECTOR_ZERO) - 1 )
-    scalePin = ITEM_SCALE * cameraDistance
+    scalePin = WorldView.ITEM_SCALE * cameraDistance
     for pin in @pins
       pin.scale.set(scalePin, scalePin, scalePin)
     for flag in @flags
@@ -117,6 +116,7 @@ class WorldView.World
     @earthParent = new THREE.Group()
     @earth = new WorldView.Earth(@earthImagePath, @renderCameraMove)
     @earthParent.add(@earth)
+    console.log 'earth scale', @earthParent.scale, @earth.scale
     @mainScene.add(@earthParent)
     @addLighting()
     @renderCameraMove()
@@ -125,15 +125,13 @@ class WorldView.World
   ###
   * Adds a 3D pin object at the given location.
   * @method addPin
-  * @param {Number} latitude
-  * @param {Number} longitude
-  * @param {Number} color
+  * @param {WorldView.ItemOptions} options
   * @return returns the 3D pin object.
   ###
-  addPin : (lat, long, color) ->
-    pin = new WorldView.Pin(lat, long, color)
+  addPin : (options) ->
+    pin = new WorldView.Pin(options)
     @pins.push(pin)
-    @addToSurface(pin, lat, long)
+    @addToSurface(pin, options.lat, options.long)
     pin
 
   ###
@@ -149,15 +147,12 @@ class WorldView.World
   ###
   * Adds a flag object with text at the given location.
   * @method addFlag
-  * @param {Number} latitude
-  * @param {Number} longitude
-  * @param {Number} color The color of the flag.
-  * @param {String} text The text which appears on the flag.
+  * @param {WorldView.ItemOptions} options
   * @return returns the 3D flag object.
   ###
-  addFlag : (lat, long, color, text) ->
-    flag = new WorldView.Flag(lat, long, color, text)
-    @addToSurface(flag, lat, long, @zScene)
+  addFlag : (options) ->
+    flag = new WorldView.Flag(options)
+    @addToSurface(flag, options.lat, options.long, @zScene)
     WorldView.lookAwayFrom(flag, @earthParent)
     @flags.push(flag)
     flag
@@ -165,30 +160,24 @@ class WorldView.World
   ###
   * Adds a cube object at the given location.
   * @method addCube
-  * @param {Number} latitude
-  * @param {Number} longitude
-  * @param {Number} color
-  * @param {Number} size The height of the cube.
+  * @param {WorldView.ItemOptions} options
   * @return returns the 3D cube object.
   ###
-  addCube : (lat, long, color, size, girth) ->
-    cube = new WorldView.Cube(lat, long, color, size, girth)
-    @addToSurface(cube, lat, long)
+  addCube : (options) ->
+    cube = new WorldView.Cube(options)
+    @addToSurface(cube, options.lat, options.long)
     WorldView.lookAwayFrom(cube, @earthParent)
     cube
 
   ###
   * Adds a cylinder object at the given location.
   * @method addCube
-  * @param {Number} latitude
-  * @param {Number} longitude
-  * @param {Number} color
-  * @param {Number} size The height of the cube.
+  * @param {WorldView.ItemOptions} options
   * @return returns the 3D cube object.
   ###
-  addCylinder : (lat, long, color, size, girth) ->
-    cylinder = new WorldView.Cylinder(lat, long, color, size, girth)
-    @addToSurface(cylinder, lat, long)
+  addCylinder : (options) ->
+    cylinder = new WorldView.Cylinder(options)
+    @addToSurface(cylinder, options.lat, options.long)
     WorldView.lookAwayFrom(cylinder, @earthParent)
     cylinder
 
@@ -205,7 +194,8 @@ class WorldView.World
     scene.add(obj)
     point = WorldView.latLongToVector3(lat, long, 2, 0)
     obj.position.set(point.x, point.y, point.z)
-    obj.scale.set(ITEM_SCALE, ITEM_SCALE, ITEM_SCALE)
+    scale = WorldView.ITEM_SCALE
+    obj.scale.set(scale, scale, scale)
     @renderCameraMove()
     obj
 
@@ -254,33 +244,26 @@ class WorldView.World
   ###
   addSeriesObjects : (series) ->
     for s in series
-      color = s.color
-      scale = s.scale
-      console.log 's', s
+      seriesColor = s.color
       for data in s.data
-        lat = data[0]
-        long = data[1]
-        itemColor = data[2]
-        itemColor ?= s.color
-        amount = data[3]
-        label = data[4]
-        date = data[5]
-        @_addObjectByType(
-          s.type,
-          lat,
-          long,
-          itemColor,
-          amount*scale,
-          label,
-          s.girth)
+        itemColor = data[2] ? seriesColor
+        options = new WorldView.ItemOptions(
+          lat : data[0]
+          long : data[1]
+          color : itemColor
+          amount : data[3]
+          label : data[4]
+          date : data[5]
+          scale : s.scale
+          grow : s.grow
+          girth : s.girth
+          height : s.height )
 
-
-  _addObjectByType : (type, lat, long, color, size, label, girth) ->
-    switch type
-      when WorldView.PIN then @addPin(lat, long, color, size)
-      when WorldView.FLAG then @addFlag(lat, long, color, label)
-      when WorldView.CUBE then @addCube(lat, long, color, size, girth)
-      when WorldView.CYLINDER then @addCylinder(lat, long, color, size, girth)
+        switch s.type
+          when WorldView.PIN then @addPin(options)
+          when WorldView.FLAG then @addFlag(options)
+          when WorldView.CUBE then @addCube(options)
+          when WorldView.CYLINDER then @addCylinder(options)
 
   ###
   * Draws an arc between two coordinates on the earth.
@@ -329,6 +312,10 @@ WorldView.CYLINDER = 'cylinder'
 WorldView.SPHERE = 'sphere'
 WorldView.PIN = 'pin'
 WorldView.FLAG = 'flag'
+WorldView.WIDTH = 'width'
+WorldView.HEIGHT = 'height'
+WorldView.BOTH = 'both'
+WorldView.ITEM_SCALE = .05  # non-earth items scale
 
 # ----------  WorldView Helper Functions ------------- #
 
@@ -355,4 +342,23 @@ WorldView.lookAwayFrom = (object, target) ->
   vector.subVectors(object.position, target.position).add(object.position)
   object.lookAt(vector)
 
+# calculates the distance of the bottom plane's edge to the earth
+# object position is adjusted toward the center of the earth slightly
+# so it does not just sit ontop as a tangent
+# stack exchange description with image : http://bit.ly/1EiBj3O
+WorldView.getObjectSurfaceOffset = (object) ->
+  r = 2 / WorldView.ITEM_SCALE # earth radius in Item Units
+  a = object.scale.x  # girth of the object
+  r - Math.sqrt(r*r-a*a/4)
+
+WorldView.getObjectGrowScale = (options) ->
+  {grow, girth, height, amount} = options
+  scale = switch grow
+    when WorldView.HEIGHT
+      new THREE.Vector3(girth, girth, amount)
+    when WorldView.WIDTH
+      new THREE.Vector3(amount, amount, height)
+    when WorldView.BOTH
+      new THREE.Vector3(amount, amount, amount)
+  scale
 
