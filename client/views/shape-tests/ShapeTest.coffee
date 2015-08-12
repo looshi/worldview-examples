@@ -1,11 +1,8 @@
 
 ###
-Earth
-renders a 3D earth into a div using THREE.js
-displays spots on the earth for each connected client
-displays arcs for each chat message sent from user to user
-  i.e. the message "@user message text contents"
-  will display an arc between current user and @user
+ShapeTest
+example which adds all the available objects = flag, pin, cylinder, cube
+and uses the drawArc function
 
 resources :
   flight path arcs :
@@ -22,9 +19,9 @@ color = Helpers.randomColor()
 earthModel = undefined
 world = undefined
 
-Template.Earth.onRendered ->
+Template.ShapeTest.onRendered ->
   options =
-    renderTo : '#earthContainer',
+    renderTo : '#ShapeTestContainer',
     earthImagePath : '/packages/looshi_worldview/assets/earthmap4k.jpg',
     backgroundColor: 0x000000,
     series: [{
@@ -98,25 +95,33 @@ Template.Earth.onRendered ->
         moveTextOutward(lat, long, text, color)
       hasPin = world.getPin(lat, long)
       unless hasPin
-        pin = world.addPin(lat, long, color)
+        options =
+          lat : lat
+          long : long
+          color: color
+        pin = world.addPin(options)
       # animate text along arc from one user to another
       # world.moveTextAlongArc(arc1,'arc 1')
 
   arc1 = world.addArc(40,-105,40.712,-74.006,0xcc0000)
 
+  # window.addEventListener('resize',->
+  #   w = $('#ShapeTestContainer').width()
+  #   h = $('#ShapeTestContainer').height()
+  #   world.setSize(w,h) )
+
 moveTextOutward = (lat, long, message, color) ->
   text = new WorldView.Text(message, color, true, 1, true)
   text.positionFromEarth = 0
   world.addToSurface(text, lat, long)
-  direction = text.position.clone().sub(earthModel.position).normalize()
   VECTOR_ZERO = new THREE.Vector3()  # 0,0,0 point
-  WorldView.lookAwayFrom(text, earthModel)
+  direction = text.position.clone().sub(VECTOR_ZERO).normalize()
+  WorldView.lookAwayFrom(text, VECTOR_ZERO)
   animateTextOutward(text, direction)
 
 # animates text from start point away from earth
 animateTextOutward = (text, direction) ->
   text.positionFromEarth = text.positionFromEarth + .5
-  console.log 'text', text.positionFromEarth
   if text.positionFromEarth < 1000
     requestAnimationFrame () ->
       text.position.add(direction.clone().multiplyScalar(.005))

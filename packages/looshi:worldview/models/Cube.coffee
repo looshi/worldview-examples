@@ -2,7 +2,7 @@
 WorldView.Cube
   3D cube shaped object
 ###
-class WorldView.Cube extends THREE.Group
+class WorldView.Cube extends THREE.Mesh
 
   constructor: (options) ->
     {@lat, @long, amount, color, opacity} = options

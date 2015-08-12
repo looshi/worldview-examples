@@ -39,11 +39,11 @@ class WorldView.World
     @earthParent = null
     @earth = null
     if @domNode
-      @appendTo( $(@domNode) )
+      @renderTo( $(@domNode) )
     @addSeriesObjects(@series)
 
   ###
-  * Renders the scene.  Applies proportional scaling to surface objects.
+  * Renders the scene.  Applies proportional scaling Flag and Pin objects.
   * @method renderCameraMove
   ###
   renderCameraMove : =>
@@ -102,7 +102,7 @@ class WorldView.World
     @zScene.add(light.clone())
     @camera.add(light)
 
-  appendTo : (domNode) ->
+  renderTo : (domNode) ->
     domNode.append( @renderer.domElement )
     dW = domNode.width()
     dH = domNode.height()
@@ -116,11 +116,23 @@ class WorldView.World
     @earthParent = new THREE.Group()
     @earth = new WorldView.Earth(@earthImagePath, @renderCameraMove)
     @earthParent.add(@earth)
-    console.log 'earth scale', @earthParent.scale, @earth.scale
     @mainScene.add(@earthParent)
     @addLighting()
     @renderCameraMove()
     return @earthParent
+
+  ###
+  * Sets the size of the renderer.
+  * @method setSize
+  * @param {Number} width
+  * @param {Number} height
+  * @return returns nothing
+  ###
+  setSize : (width, height) ->
+    @camera.aspect = width / height
+    @camera.updateProjectionMatrix()
+    @renderer.setSize(width, height)
+    @renderCameraMove()
 
   ###
   * Adds a 3D pin object at the given location.

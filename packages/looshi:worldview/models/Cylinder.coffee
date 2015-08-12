@@ -24,7 +24,6 @@ class WorldView.Cylinder extends THREE.Group
 
 
     zOffset = WorldView.getObjectSurfaceOffset(cylinder.scale.y)
-    console.log 's', cylinder.scale.y, zOffset
     unless grow is WorldView.WIDTH
       zOffset = (amount/2) - zOffset*2 # strange, but have to zOffset*2 here
     cylinder.position.set(0, 0, zOffset)
