@@ -1,3 +1,15 @@
+# ----------  WorldView Constants -------------------- #
+
+WorldView.CUBE = 'cube'
+WorldView.CYLINDER = 'cylinder'
+WorldView.SPHERE = 'sphere'
+WorldView.PIN = 'pin'
+WorldView.FLAG = 'flag'
+WorldView.WIDTH = 'width'
+WorldView.HEIGHT = 'height'
+WorldView.BOTH = 'both'
+WorldView.EARTH_RADIUS = 100
+
 ###*
  * @class WorldView.World
  * @description 3D model of the earth with lat/long data representations
@@ -38,6 +50,9 @@ class WorldView.World
     @controls = null
     @earthParent = null
     @earth = null
+
+    @surfaceGeom = new THREE.Geometry()
+
     if @domNode
       @renderTo( $(@domNode) )
     @addSeriesObjects(@series)
@@ -47,11 +62,11 @@ class WorldView.World
   * @method renderCameraMove
   ###
   renderCameraMove : =>
-    # scale pins inversely proportional to zoom
-    cameraDistance = Math.log( @camera.position.distanceTo(VECTOR_ZERO) - 1 )
-    scalePin = WorldView.ITEM_SCALE * cameraDistance
+    # scale pins and flags inversely proportional to zoom
+    zoomScale = .01 * @camera.position.distanceTo(VECTOR_ZERO)
+
     for pin in @pins
-      pin.scale.set(scalePin, scalePin, scalePin)
+      pin.scale.set(zoomScale, zoomScale, zoomScale)
     for flag in @flags
       flag.setRotationFromQuaternion(@camera.quaternion)
       # manually hide flags when they go behind earth when
@@ -64,14 +79,14 @@ class WorldView.World
       Angle = Math.acos(Angle)
       if Angle < 1.2
         flag.visible = true
-        flag.scale.set(scalePin, scalePin, scalePin)
+        flag.scale.set(zoomScale, zoomScale, zoomScale)
       else
         flag.visible = false
 
     @renderScene()
 
   ###
-  * Renders the scene.  Does not apply proportional scaling of surface objects.
+  * Renders the scene.  Does not apply proportional scaling of flags or pins.
   *
   * Automatically called in all of the 'add' methods, addPin, addFlag, etc.
   * You only need to call this function if you are manually manipulating
@@ -97,7 +112,7 @@ class WorldView.World
     @zScene.add(ambientLight.clone())
     light = new THREE.DirectionalLight(0xffffff, 1)
     light.castShadow = true
-    light.position.set(-15, 8, -20)
+    light.position.set(-300, 80, -700)
     light.castShadow  = true
     @zScene.add(light.clone())
     @camera.add(light)
@@ -107,8 +122,9 @@ class WorldView.World
     dW = domNode.width()
     dH = domNode.height()
     @renderer.setSize(dW, dH)
-    @camera = new THREE.PerspectiveCamera(45, dW/dH, 0.01, 100)
-    @camera.position.z = 8
+    cameraFar = WorldView.EARTH_RADIUS * 30 # distance from camera to render
+    @camera = new THREE.PerspectiveCamera(45, dW/dH, 1, cameraFar)
+    @camera.position.z = WorldView.EARTH_RADIUS * 4
     @controls = new THREE.OrbitControls(@camera, domNode[0])
     @controls.damping = 0.2
     @controls.addEventListener('change', @renderCameraMove)
@@ -170,31 +186,33 @@ class WorldView.World
     flag
 
   ###
-  * Adds a cube object at the given location.
+  * Merges a cube object to the surface at the given location.
   * @method addCube
   * @param {WorldView.ItemOptions} options
   * @return returns the 3D cube object.
   ###
-  addCube : (options) ->
+  _mergeCube : (options) ->
     cube = new WorldView.Cube(options)
-    @addToSurface(cube, options.lat, options.long)
-    WorldView.lookAwayFrom(cube, @earthParent)
+    @_mergeToSurface(cube, options.lat, options.long)
     cube
 
   ###
-  * Adds a cylinder object at the given location.
+  * Merges a cylinder object to the surface at the given location.
   * @method addCylinder
   * @param {WorldView.ItemOptions} options
   * @return returns the 3D cube object.
   ###
-  addCylinder : (options) ->
+  _mergeCylinder : (options) ->
     cylinder = new WorldView.Cylinder(options)
-    @addToSurface(cylinder, options.lat, options.long)
     WorldView.lookAwayFrom(cylinder, @earthParent)
+    @_mergeToSurface(cylinder, options.lat, options.long)
     cylinder
 
   ###
   * Adds any 3D object to the surface of the earth.
+  * Use this method if you need to retain interactivity or move the object
+  * after it has been added to the scene.  This method returns the 3D object
+  * instance for use later.
   * @method addToSurface
   * @param {THREE.Object3D} object THREE.Object3D object.
   * @param {Number} latitude
@@ -204,12 +222,38 @@ class WorldView.World
   addToSurface : (obj, lat, long, scene) ->
     scene ?= @mainScene
     scene.add(obj)
-    point = WorldView.latLongToVector3(lat, long, 2, 0)
+    point = WorldView.latLongToVector3(lat, long)
     obj.position.set(point.x, point.y, point.z)
-    scale = WorldView.ITEM_SCALE
-    obj.scale.set(scale, scale, scale)
     @renderCameraMove()
     obj
+
+  ###
+  * Merges mesh to the surface of the earth.
+  * The object properties will no longer be editable.
+  * @method _mergeToSurface
+  * @param {THREE.Object3D} object
+  * @param {Number} latitude
+  * @param {Number} longitude
+  * @return null
+  ###
+  _mergeToSurface : (obj, lat, long) ->
+
+    {width, depth, radiusTop, height} = obj.geometry.parameters
+    if depth # CUBE
+      zOffset = depth/2 - WorldView.getObjectSurfaceOffset(width)
+    else if radiusTop and height # CYLINDER
+      zOffset = height/2 - WorldView.getObjectSurfaceOffset(radiusTop*2)
+
+    point = WorldView.latLongToVector3(lat, long, zOffset)
+    obj.position.set(point.x, point.y, point.z)
+
+    WorldView.lookAwayFrom(obj, @earthParent)
+    obj.updateMatrix()
+
+    @surfaceGeom.merge(obj.geometry, obj.matrix)
+
+    return null
+
 
   ###
   * Adds any 3D object to the scene.
@@ -229,6 +273,7 @@ class WorldView.World
   ###
   remove : (obj) ->
     @mainScene.remove(obj)
+    # TODO call .dispose ()
     @renderCameraMove()
 
   ###
@@ -254,16 +299,39 @@ class WorldView.World
   * @return returns nothing.
   ###
   addSeriesObjects : (series) ->
+    LAT = 0
+    LONG = 1
+    COLOR = 2
+    AMOUNT = 3
+    LABEL = 4
+    max = null
+    min = null
+
     for s in series
-      seriesColor = s.color
+
+      if Array.isArray(s.color)
+        max = _.max(s.data, (item) -> return item[AMOUNT] )[AMOUNT]
+        min = _.min(s.data, (item) -> return item[AMOUNT] )[AMOUNT]
+
       for data in s.data
-        itemColor = data[2] ? seriesColor
+
+        if data[COLOR]
+          itemColor = data[COLOR]
+        else if Array.isArray(s.color)
+          percent = (data[AMOUNT]-min)/(max-min)
+          itemColor = WorldView.blendColors(s.color[0], s.color[1], percent)
+        else
+          itemColor = s.color
+
+        if typeof itemColor is 'string'
+          itemColor = WorldView.stringToHex(itemColor)
+
         options = new WorldView.ItemOptions(
-          lat : data[0]
-          long : data[1]
+          lat : data[LAT]
+          long : data[LONG]
           color : itemColor
-          amount : data[3]
-          label : data[4]
+          amount : data[AMOUNT]
+          label : data[LABEL]
           opacity : s.opacity
           scale : s.scale
           grow : s.grow
@@ -273,8 +341,17 @@ class WorldView.World
         switch s.type
           when WorldView.PIN then @addPin(options)
           when WorldView.FLAG then @addFlag(options)
-          when WorldView.CUBE then @addCube(options)
-          when WorldView.CYLINDER then @addCylinder(options)
+          when WorldView.CUBE then @_mergeCube(options)
+          when WorldView.CYLINDER then @_mergeCylinder(options)
+
+    surfaceMaterial = new THREE.MeshLambertMaterial(
+      {color: 0xffffff,
+      shading: THREE.SmoothShading,
+      vertexColors: THREE.VertexColors})
+
+    surfaceMesh = new THREE.Mesh(@surfaceGeom, surfaceMaterial)
+    @mainScene.add(surfaceMesh)
+    @renderCameraMove()
 
   ###
   * Draws an arc between two coordinates on the earth.
@@ -284,7 +361,7 @@ class WorldView.World
   * @param {Number} toLat
   * @param {Number} toLong
   * @param {Number} color The color of the arc.
-  * @return returns nothing.
+  * @return {WorldView.Arc} The arc object.
   ###
   addArc : (fromLat, fromLong, toLat, toLong, color) ->
     arc = new WorldView.Arc(fromLat, fromLong, toLat, toLong, color)
@@ -316,21 +393,11 @@ class WorldView.World
         @renderScene()
       ), 1000
 
-# ----------  WorldView Constants -------------------- #
-
-WorldView.CUBE = 'cube'
-WorldView.CYLINDER = 'cylinder'
-WorldView.SPHERE = 'sphere'
-WorldView.PIN = 'pin'
-WorldView.FLAG = 'flag'
-WorldView.WIDTH = 'width'
-WorldView.HEIGHT = 'height'
-WorldView.BOTH = 'both'
-WorldView.ITEM_SCALE = .05  # non-earth items scale
 
 # ----------  WorldView Helper Functions ------------- #
 
-WorldView.latLongToVector3 = (lat, lon, radius, height) ->
+WorldView.latLongToVector3 = (lat, lon, height=0) ->
+  radius = WorldView.EARTH_RADIUS
   phi = (lat)*Math.PI/180
   theta = (lon-180)*Math.PI/180
   x = -(radius+height) * Math.cos(phi) * Math.cos(theta)
@@ -353,23 +420,44 @@ WorldView.lookAwayFrom = (object, target) ->
   vector.subVectors(object.position, target.position).add(object.position)
   object.lookAt(vector)
 
-# calculates the distance of the bottom plane's edge to the earth
-# object position is adjusted toward the center of the earth slightly
-# so it does not just sit ontop as a tangent
+# calculates the distance of Objects bottom plane's edge to the earth
+# used to position object so it does not just sit ontop as a tangent
 # stack exchange description with image : http://bit.ly/1EiBj3O
 WorldView.getObjectSurfaceOffset = (girth) ->
-  r = 2 / WorldView.ITEM_SCALE # earth radius in Item Units
-  a = girth  # girth of the object
-  r - Math.sqrt(r*r-a*a/2)
+  r = WorldView.EARTH_RADIUS
+  r - Math.sqrt(r*r-girth*girth/2)
 
 WorldView.getObjectGrowScale = (options) ->
-  {grow, girth, height, amount} = options
-  scale = switch grow
+  {grow, girth, height, amount, scale} = options
+  amount = amount * scale
+  growScale = switch grow
     when WorldView.HEIGHT
       new THREE.Vector3(girth, girth, amount)
     when WorldView.WIDTH
       new THREE.Vector3(amount, amount, height)
     when WorldView.BOTH
       new THREE.Vector3(amount, amount, amount)
-  scale
+  growScale
+
+# http://stackoverflow.com/questions/5560248/programmatically-lighten-or-darken-a-hex-color-or-rgb-and-blend-colors
+WorldView.blendColors = (c0, c1, p) ->
+    f = parseInt(c0.slice(1),16)
+    t = parseInt(c1.slice(1),16)
+    R1 = f>>16
+    G1 = f>>8&0x00FF
+    B1 = f&0x0000FF
+    R2 = t>>16
+    G2 = t>>8&0x00FF
+    B2 = t&0x0000FF
+    color = "0x"+(0x1000000+(Math.round((R2-R1)*p)+R1)*0x10000+(Math.round((G2-G1)*p)+G1)*0x100+(Math.round((B2-B1)*p)+B1)).toString(16).slice(1)
+    color = Number(color)
+
+
+
+WorldView.stringToHex = (color) ->
+  color = color.substring(1)
+  color = '0x' + color
+  Number(color)
+
+
 

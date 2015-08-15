@@ -8,8 +8,8 @@ class WorldView.Arc extends THREE.Line
 
     color ?= 0xffffff  # default to white if no color specified
 
-    a = WorldView.latLongToVector3(fromLat, fromLong, 2, 0)
-    b = WorldView.latLongToVector3(toLat, toLong, 2, 0)
+    a = WorldView.latLongToVector3(fromLat, fromLong)
+    b = WorldView.latLongToVector3(toLat, toLong)
 
     m1 = WorldView.getPointInBetween(a, b, .4)
     m2 = WorldView.getPointInBetween(a, b, .6)

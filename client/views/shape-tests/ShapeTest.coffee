@@ -9,9 +9,10 @@ resources :
   https://brunodigiuseppe.wordpress.com/2015/02/14/flight-paths-with-threejs/
   point on line :
   http://jsfiddle.net/0mgqa7te/
-  latLongToVector3 :
   http://www.smartjava.org/content/render-open-data-3d-world-globe-threejs
 ###
+
+# http://cheesehead-techblog.blogspot.com/2013/12/amtrak-real-time-train-data.html
 
 pin = undefined
 flag = undefined
@@ -23,23 +24,23 @@ Template.ShapeTest.onRendered ->
   options =
     renderTo : '#ShapeTestContainer',
     earthImagePath : '/packages/looshi_worldview/assets/earthmap4k.jpg',
-    backgroundColor: 0x000000,
+    backgroundColor: '#000000',
     series: [{
       name: "First Series",
       type : WorldView.CYLINDER,
-      color: 0xcc0000,
-      scale: 50,
+      color: '#cc0000',
+      scale: 1,
       girth: 1,
-      grow: WorldView.HEIGHT,
+      grow: WorldView.BOTH,
       opacity: .6,
       data: [
-        [35.6833, 139.7667, 0xcc0000, 0.5,'Japan'],
-        [40.712,-74.006, 0x000ccc, 0.28,'New York'],
+        [35.6833, 139.7667, 0xcc0000, 5,'Japan'],
+        [40.712,-74.006, 0x000ccc, 28,'New York'],
       ]},{
       name: "Cylinders",
-      type : WorldView.PIN,
-      color: 0x003322,
-      scale: 25,
+      type : WorldView.FLAG,
+      color: '#003322',
+      scale: 1,
       height: .2,
       opacity: .7,
       grow: WorldView.WIDTH,
@@ -49,16 +50,16 @@ Template.ShapeTest.onRendered ->
         [-35.3,149.1,0x0cc0000, 0.28,'Australia']
       ]},{
       name: "Second Series",
-      type : WorldView.FLAG,
+      type : WorldView.CUBE,
       color: 0x00cc00,
-      scale: 4,
+      scale: 1,
       opacity: .5,
       data: [
         [-34.6033,-58.3817,null,2,'Buenos Aires'],
         [48.856,2.3508,null,3, 'Paris'],
       ]},{
       name: "Third Series",
-      type : WorldView.CYLINDER,
+      type : WorldView.PIN,
       color: 0x88cccc,
       scale: 1,
       opacity: .8,
