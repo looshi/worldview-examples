@@ -13,6 +13,8 @@ resources :
   0    1   2    3     4   5       7   8   9    10  11  12 13      14    15
 ###
 
+# weather underground key
+# 7036cae1249eeb26
 
 Template.Earthquakes.onRendered ->
 
@@ -39,7 +41,7 @@ Template.Earthquakes.onRendered ->
       backgroundColor: '#000000',
       series: [{
         name: "Earthquakes last 7 days",
-        type : WorldView.CYLINDER,
+        type : WorldView.CONE,
         color: ['#0000cc','#ff0000']
         scale: 1,
         girth: 1,
