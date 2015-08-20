@@ -24,7 +24,6 @@ Template.DefaultShapes.onRendered ->
       name: "Flags",
       type : WorldView.FLAG,
       opacity: .7,
-      grow: WorldView.WIDTH,
       data: [
         [46,-110, 0xcc0000,0.2,'CUBE'],
         [0, -85.1333, 0xcccc00, 0.28,'CONE'],
