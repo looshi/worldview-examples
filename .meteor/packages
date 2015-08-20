@@ -13,3 +13,5 @@ stylus
 looshi:worldview
 davidcittadini:three@0.71.12
 momentjs:moment
+perak:codemirror
+reactive-var

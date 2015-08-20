@@ -1,3 +1,29 @@
 <template name="Earthquakes">
-  <div class='earth-view' id='EarthquakesContainer'></div>
+  <div class = 'example-details'>
+    <h4>Recent Earthquakes</h4>
+    <p>Displays all earthquakes from the last 7 days.
+      The size of each marker represents the magnitude.
+      The largest 10 earthquakes are noted with a text marker.
+      Drag to rotate earth.  Use mouse wheel to zoom.
+    </p>
+    <p>Data Source :
+      <a href = 'http://earthquake.usgs.gov/earthquakes/'>earthquake.usgs.gov</a>
+    </p>
+    <p>
+      <a
+      href = 'https://github.com/looshi/worldview-examples/blob/master/client/examples/earthquakes/Earthquakes.js'
+      target= '_blank'>
+      View source code on github
+      </a>
+    </p>
+  </div>
+  <div class='example-container'>
+    <div class='earth-view' id='EarthquakesContainer'></div>
+    <div class='source-view'>
+      {{> SourceView
+        reactiveVar='earthquakeSource'
+        source = 'https://raw.githubusercontent.com/looshi/worldview-examples/master/client/examples/earthquakes/Earthquakes.js'
+      }}
+    </div>
+  </div>
 </template>

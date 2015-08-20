@@ -1,0 +1,27 @@
+<template name="Altitude">
+  <div class = 'example-details'>
+    <h4>Cities Altitude</h4>
+    <p>Displays relative altitude of each world city.
+    </p>
+    <p>Data Source :
+      <a href = 'https://github.com/bahar/WorldCityLocations'>
+        github.com/bahar/WorldCityLocations</a>
+    </p>
+    <p>
+      <a
+      href = 'https://github.com/looshi/worldview-examples/blob/master/client/examples/'
+      target= '_blank'>
+      View source code on github
+      </a>
+    </p>
+  </div>
+  <div class='example-container'>
+    <div class='earth-view' id='AltitudeContainer'></div>
+    <div class='source-view'>
+        {{> SourceView
+          reactiveVar='earthquakeSource'
+          source = 'https://raw.githubusercontent.com/looshi/worldview-examples/master/client/examples/earthquakes/Earthquakes.js'
+        }}
+      </div>
+  </div>
+</template>
