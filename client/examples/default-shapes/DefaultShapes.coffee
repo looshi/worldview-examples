@@ -1,6 +1,5 @@
-
 ###
-ShapeTest
+DefaultShapes ( in coffeescript )
 example which adds all the available objects = flag, pin, cylinder, cube
 TODO : fix the drawArc function
 ###
@@ -11,7 +10,7 @@ color = Helpers.randomColor()
 earthModel = undefined
 world = undefined
 
-Template.ShapeTest.onRendered ->
+Template.DefaultShapes.onRendered ->
   options =
     renderTo : '#ShapeTestContainer',
     earthImagePath : '/packages/looshi_worldview/assets/earthmap4k.jpg',

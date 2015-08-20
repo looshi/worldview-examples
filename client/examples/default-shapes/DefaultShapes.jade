@@ -1,0 +1,19 @@
+template(name="DefaultShapes")
+  .example-details
+    h4 Default Shapes
+    p Displays the various 3D objects available for use in series data.
+      | Drag to rotate earth.  Use mouse wheel to zoom.
+      | Cubes, Cylinders and Cones remain at a fixed scale.
+      | Pins and Flags scale relative to the camera distance.
+      | Cubes are good if you need to map 1000s of data points since they contain few polygons.
+    p
+      a(
+      href = 'https://github.com/looshi/worldview-examples/tree/master/client/examples/shape-tests'
+      target= '_blank')
+        | View source code on github
+  .example-container
+    .earth-view(id='ShapeTestContainer')
+    .source-view
+      +SourceView(
+        reactiveVar='shapeTestSource'
+        source = 'https://raw.githubusercontent.com/looshi/worldview-examples/master/client/examples/shape-tests/DefaultShapes.coffee')
