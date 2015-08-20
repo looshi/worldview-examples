@@ -7,7 +7,6 @@ TODO : fix the drawArc function
 Template.DefaultShapes.onRendered ->
   options =
     renderTo : '#ShapeTestContainer',
-    earthImagePath : '/packages/looshi_worldview/assets/earthmap4k.jpg',
     backgroundColor: '#bbbbbb',
     series: [{
       name: "Cylinders",
