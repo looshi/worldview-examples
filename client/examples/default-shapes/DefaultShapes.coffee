@@ -4,12 +4,6 @@ example which adds all the available objects = flag, pin, cylinder, cube
 TODO : fix the drawArc function
 ###
 
-pin = undefined
-flag = undefined
-color = Helpers.randomColor()
-earthModel = undefined
-world = undefined
-
 Template.DefaultShapes.onRendered ->
   options =
     renderTo : '#ShapeTestContainer',
