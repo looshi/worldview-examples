@@ -15,3 +15,5 @@ davidcittadini:three@0.71.12
 momentjs:moment
 perak:codemirror
 reactive-var
+kadira:flow-router
+kadira:blaze-layout

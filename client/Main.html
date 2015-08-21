@@ -1,0 +1,34 @@
+<head>
+  <title>World View Examples</title>
+  <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css"/>
+</head>
+<body>
+  <header>
+    <h1>
+      <a href='/'>looshi:worldview package examples</a>
+    </h1>
+    <p>
+      <a href='https://github.com/looshi/worldview' target='_blank'>
+        github.com/looshi/worldview
+      </a>
+    </p>
+  </header>
+  {{> Nav}}
+  {{> MainLayout}}
+</body>
+
+<template name='MainLayout'>
+  {{> Template.dynamic template=content}}
+</template>
+
+<template name='Home'>
+  <a href='/earthquakes'>
+      <img src='/earthquakes.jpg'/>
+    </a>
+    <a href='/altitude'>
+      <img src='/altitude.jpg'/>
+    </a>
+    <a href='/default-shapes'>
+      <img src='/default-shapes.jpg'/>
+    </a>
+</template>
