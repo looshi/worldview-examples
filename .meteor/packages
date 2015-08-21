@@ -7,8 +7,6 @@
 meteor-platform
 coffeescript
 mquandalle:jade
-accounts-password
-anticoders:fake
 stylus
 looshi:worldview
 davidcittadini:three@0.71.12
