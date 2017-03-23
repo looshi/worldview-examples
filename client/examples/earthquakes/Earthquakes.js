@@ -15,7 +15,7 @@ resources :
 
 Template.Earthquakes.onRendered(function(){
   // load the earthquake data
-  var feed = 'http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.csv';
+  var feed = 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.csv';
   var data = null;
   var query = $.get(feed).complete(function(){
     data = query.responseText;
